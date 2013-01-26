@@ -28,6 +28,19 @@ function HeartbeatCanvas() {
 	this.targetVisibility = false;
 	this.visSpeed = false;
 	this._setVisibility(this.beatMax);
+	/*
+	lowLag.init({'urlPrefix':'audio/','debug':'none'});
+	lowLag.load(["Heartbeat1.wav"], 'Heartbeat1');
+	lowLag.load(["Heartbeat2.wav"], 'Heartbeat2');
+	lowLag.load(["Heartbeat3.wav"], 'Heartbeat3');
+	*/
+	/*
+		Crafty.audio.add({
+			Heartbeat1: "audio/Heartbeat1.wav",
+			Heartbeat2: "audio/Heartbeat2.wav",
+			Heartbeat3: "audio/Heartbeat3.wav"
+		});
+		*/
 }
 
 $.extend(HeartbeatCanvas.prototype, {
@@ -84,18 +97,49 @@ $.extend(HeartbeatCanvas.prototype, {
 			}
 		}
 	},
+	_pulseToSoundFile: function(pulse) {
+		if (pulse < 70) {
+			return 'Heartbeat3';
+		} else if (pulse < 100) {
+			return 'Heartbeat2';
+		} else {
+			return 'Heartbeat1';
+		}
+	},
+	_soundFileToDelay: function(soundFile) {
+		if (soundFile == 'Heartbeat1') {
+			return 100;
+		} else if (soundFile == 'Heartbeat2') {
+			return 200;
+		} else {
+			return 300;
+		}
+	},
 	_pulseBeat: function() {
 		var self = this;
+		/*
 		if (this._pulseIntervalUpdate) {
 			var newPulseTime = 60000.0 / this.pulse;
 			if (this._pulseInterval) {
 				window.clearInterval(this._pulseInterval);
 			}
-			this._pulseInterval = window.setInterval($.proxy(this,'_pulseBeat'), newPulseTime);
+			this._pulseInterval = window.setInterval($.proxy(this,'_pulseBeat'), 50);
 			this._pulseIntervalUpdate = false;
 		}
+		var newTime = Date.now();
+		if (!forcePulse && newTime < this._nextPulse) {
+			return;
+		}
+		this._nextPulse = newTime + (60000.0 / this.pulse);
+		*/
+		if (this._pulseInterval) {
+			window.clearTimeout(this._pulseInterval);
+		}
 		this.beat(this.beatMax, this.beatSpeed);
-		window.setTimeout(function() {self.beat(self.beatMax, self.beatSpeed);}, this.pulseDelay);
+		var soundFile = this._pulseToSoundFile(this.pulse);
+		//lowLag.play(soundFile);
+		window.setTimeout(function() {self.beat(self.beatMax, self.beatSpeed);}, this._soundFileToDelay(soundFile));
+		this._pulseInterval = window.setTimeout($.proxy(this,'_pulseBeat'), 60000.0 / this.pulse);
 	},
 	beat: function(maxRadius, speed) {
 		this.beats.push({
