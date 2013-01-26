@@ -9,6 +9,8 @@ var TILEMAP_DOWN = 5;
 
 var PLAYER_WIDTH = 50;
 var PLAYER_HEIGHT = 100;
+var SHADOW_WIDTH = 50;
+var SHADOW_HEIGHT = 13;
 
 var GOAL_X = 3000;
 var GOAL_Y = 3000;
@@ -21,8 +23,14 @@ var DOM_OR_CANVAS = "DOM";
 
 var BG_MAP_SRC = "art/map_placeholder1.png";
 var PLAYER_SRC = "art/placeholderspritesheet_avatar.png";
+var SHADOW_SRC = "art/placeholder_shadow.png";
 var TILEMAP_SRC = "art/placeholder_streettiles.png";
 var MAP_SRC = "map/test.json";
+
+var PLAYER_HEALTH = 100;
+
+
+
 
 // globals
 var player;
@@ -43,6 +51,10 @@ Crafty.sprite(1, BG_MAP_SRC, {
 
 Crafty.sprite(PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SRC, {
 	player: [0, 0]
+});
+
+Crafty.sprite(SHADOW_WIDTH, SHADOW_HEIGHT, SHADOW_SRC, {
+	shadow: [0, 0]
 });
 
 Crafty.sprite(TILE_WIDTH, TILE_HEIGHT, TILEMAP_SRC, {
@@ -68,7 +80,11 @@ var TILE_LIST = new Array(new Array("street1", "street2"),
 						new Array("clutter"),
 						new Array("safe"));
 
-
+var TILELABEL_LIST = new Array(new Array("street", "street"), 
+						new Array("sidewalk", "sidewalk", "sidewalk", "sidewalk", "sidewalk", "sidewalk", "sidewalk", "sidewalk"),
+						new Array("alley", "alley"), 
+						new Array("clutter"),
+						new Array("safe"));
 
 /**
 The function called to begin Crafty
@@ -88,7 +104,7 @@ the loading screen that will display while our assets load
 Crafty.scene("loading", function () {
 	console.log("in loading");
     //load takes an array of assets and a callback when complete
-    Crafty.load([BG_MAP_SRC, PLAYER_SRC, TILEMAP_SRC], function () {
+    Crafty.load([BG_MAP_SRC, PLAYER_SRC, TILEMAP_SRC, SHADOW_SRC], function () {
         Crafty.scene("main"); //when everything is loaded, run the main scene
     });
 
@@ -149,6 +165,8 @@ function generateWorld() {
 	player = Crafty.e("2D, DOM, player, playerAnim, playerControls")
         .attr({ x: PLAYER_START_X, y: PLAYER_START_Y, z: 10 });
 	player.fourway(4);
+	shadow = Crafty.e("2D, DOM, shadow, Collision")
+		.attr({ x: PLAYER_START_X, y: PLAYER_START_Y + 87, z: 9 });
 	
 	player.bind("NewDirection",
 				function (direction) {
@@ -174,11 +192,14 @@ function generateWorld() {
 				});
 	
 	player.bind('Moved', function(from) {
-			// draw a thing after the player
+			// move the shadow with the player
+			shadow.x = player.x;
+			shadow.y = player.y + 87;
 	
 				//Crafty.viewport.centerOn(player, 1);
-				if(this.hit('solid') || this.x < 0 || this.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
+				if(shadow.hit('clutter') || this.x < 0 || this.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
 					this.attr({x: from.x, y:from.y});
+					shadow.attr({x: from.x, y:from.y + 87});
 				}
 				hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 2 + Crafty.viewport.y)
 			})
@@ -218,7 +239,7 @@ function generateMap(json){
 				continue;
 			}
 			var rowCol = linToRowCol(tileNum - 1, TILEMAP_ACROSS, TILEMAP_DOWN);
-			Crafty.e("2D, DOM, " + TILE_LIST[rowCol[0]][rowCol[1]] + ", street")
+			Crafty.e("2D, DOM, " + TILE_LIST[rowCol[0]][rowCol[1]] + ", " + TILELABEL_LIST[rowCol[0]][rowCol[1]])
 					.attr({x: col * TILE_WIDTH, y: row * TILE_HEIGHT, z: 1});
 			ctr += 1;
 		}
