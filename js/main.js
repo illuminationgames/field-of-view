@@ -9,6 +9,8 @@ var TILEMAP_DOWN = 5;
 
 var PLAYER_WIDTH = 50;
 var PLAYER_HEIGHT = 100;
+var ENEMY_WIDTH = 50;
+var ENEMY_HEIGHT = 100;
 var SHADOW_WIDTH = 50;
 var SHADOW_HEIGHT = 13;
 
@@ -22,8 +24,9 @@ var FRAME_DELAY = 20;
 var DOM_OR_CANVAS = "DOM";
 
 var BG_MAP_SRC = "art/field-view-1.png";
-var PLAYER_SRC = "art/placeholderspritesheet_avatar.png";
+var PLAYER_SRC = "art/avespritesheet.png";
 var SHADOW_SRC = "art/placeholder_shadow.png";
+var ENEMY_SRC = "art/placeholderspritesheet_npc.png";
 var TILEMAP_SRC = "art/placeholder_streettiles.png";
 var ENEMYRANGE_SRC = "art/enemy_radius.png";
 var MAP_SRC = "map/field-view-map1.json";
@@ -35,13 +38,15 @@ var PLAYER_LOSE_LIMIT = 49;
 var ENEMY_EFFECT_RADIUS = 100;
 var ENEMY_DISTANCE_MULTIPLIER = .2;
 
-var PLAYER_LOSE_HEALTH_RATE = 5;
+var PLAYER_LOSE_HEALTH_RATE = 10;
+var PLAYER_LOSE_HEALTH_RATE_ALLEY = 5;
 var PLAYER_LOSE_HEALTH_DELAY = 500;
 var PLAYER_GAIN_HEALTH_RATE = 10;
 var PLAYER_GAIN_HEALTH_DELAY = 500;
 
 // states
 var inEnemyRange = false;
+var inAlley = false;
 var inSafeArea = false;
 
 // globals
@@ -66,6 +71,10 @@ Crafty.sprite(1, BG_MAP_SRC, {
 
 Crafty.sprite(PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SRC, {
 	player: [0, 0]
+});
+
+Crafty.sprite(ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_SRC, {
+	enemy: [0, 0]
 });
 
 Crafty.sprite(SHADOW_WIDTH, SHADOW_HEIGHT, SHADOW_SRC, {
@@ -123,9 +132,9 @@ the loading screen that will display while our assets load
 */
 Crafty.scene("loading", function () {
 	console.log("in loading");
-    //load takes an array of assets and a callback when complete
-    Crafty.load([BG_MAP_SRC, PLAYER_SRC, TILEMAP_SRC, SHADOW_SRC, ENEMYRANGE_SRC], function () {
-        Crafty.scene("main"); //when everything is loaded, run the main scene
+    //load takes an array of assets and a callback when complete, runs the main scene
+    Crafty.load([BG_MAP_SRC, PLAYER_SRC, ENEMY_SRC, TILEMAP_SRC, SHADOW_SRC, ENEMYRANGE_SRC], function () {
+        Crafty.scene("main"); 
     });
 
     //black background with some loading text
@@ -151,7 +160,6 @@ Crafty.scene("main", function () {
 	Crafty.viewport.follow(player, 1, 1);
 
 	frameDelay = Crafty.e('Delay');
-	//frameDelay.delay(eachFrame, FRAME_DELAY);
 	
 	// load the JSON map file and call generateMap when it does
 	$.getJSON(MAP_SRC, generateMap);
@@ -172,13 +180,14 @@ function generateWorld() {
 		}
 	});
 	
-	//create our player entity
-
+	//create player entity
 	Crafty.c("playerAnim", {
 		init: function() {
 		  this.requires('SpriteAnimation, Collision, Grid')
 			  .animate('stand', 0, 0, 0)
-			  .animate('walk', 0, 0, 2)
+			  .animate('walk', 1, 0, 4)
+			  .animate('huddled', 5, 0, 5)
+			  .animate('huddled_walk', 6, 0, 9);
 		}
 	});
 	
@@ -191,8 +200,14 @@ function generateWorld() {
 	player.bind("NewDirection",
 				function (direction) {
 					if (direction.x != 0 || direction.y != 0) {
-						if (!this.isPlaying("walk"))
-							this.stop().animate("walk", 20, -1);
+						if(inEnemyRange || inAlley){
+							if (!this.isPlaying("huddled_walk"))
+								this.stop().animate("huddled_walk", 20, -1);
+						}
+						else{
+							if (!this.isPlaying("walk"))
+								this.stop().animate("walk", 20, -1);
+						}
 					}
 					/*if (direction.x > 0) {
 						if (!this.isPlaying("walk_right"))
@@ -207,7 +222,10 @@ function generateWorld() {
 							this.stop().animate("walk_down", 10, -1);
 					}*/
 					else if(!direction.x && !direction.y) {
-						this.stop().animate("stand", 20, -1);
+						if(inEnemyRange || inAlley)
+							this.stop().animate("huddled", 20, -1);
+						else
+							this.stop().animate("stand", 20, -1);
 					}
 				});
 	
@@ -226,7 +244,7 @@ function generateWorld() {
 				if(player.hit('safe')){
 					if(!inSafeArea){
 						inSafeArea = true;
-						healthUpBySec();
+						healthUpBySec(PLAYER_GAIN_HEALTH_RATE);
 					}
 				}
 				else{
@@ -238,10 +256,22 @@ function generateWorld() {
 					if(!inEnemyRange){
 						inEnemyRange = true;
 						healthDownBySec();
+						if (!this.isPlaying("huddled_walk"))
+							this.stop().animate("huddled_walk", 20, -1);
+					}
+				}
+				else if(player.hit('alley')){
+					if(!inAlley){
+						inAlley = true;
+						healthDownBySec();
+						if (!this.isPlaying("huddled_walk"))
+							this.stop().animate("huddled_walk", 20, -1);
 					}
 				}
 				else{
 					inEnemyRange = false;
+					if (!this.isPlaying("walk"))
+						this.stop().animate("walk", 20, -1);
 				}
 				
 				// block handles getting home safely
@@ -268,22 +298,21 @@ function generateWorld() {
 Function to load the map file
 */
 function generateMap(json){
-	
 	// test whether the map has been loaded
 	var mapLayer1 = json.layers[0];
 	var mapWidth = mapLayer1.width;
 	var mapHeight = mapLayer1.height;
-	var mapData = mapLayer1.data;
 	
-	var mapLayer2 = json.layers[1];
-	var houseData = mapLayer2.data;
-	// console.log(mapData);
+	var groundData = json.layers[0].data;
+	var noWalkData = json.layers[1].data;
+	var enemyData = json.layers[2].data;
 	
 	MAP_WIDTH = mapWidth * TILE_WIDTH;
 	MAP_HEIGHT = mapHeight * TILE_HEIGHT;
 	
 	var ctr = 0;
 	
+	/*
 	for(var row = 0; row < mapHeight; row += 1){
 		for(var col = 0; col < mapWidth; col += 1){
 			var tileNum = mapData[ctr];
@@ -299,29 +328,45 @@ function generateMap(json){
 			// create the new block
 			Crafty.e("2D, " + TILE_LIST[rowCol[0]][rowCol[1]] + ", " + TILELABEL_LIST[rowCol[0]][rowCol[1]])
 					.attr({x: minX, y: minY, z: 1});
-					
-			// create a "radius of enmity" around the block's center
-			if(blockType == "clutter"){
+
+			ctr += 1;
+		}
+	}*/
+	
+	// initialize the safe, can't-walk-here, and enemy blocks
+	for(var row = 0; row < mapHeight; row += 1){
+		for(var col = 0; col < mapWidth; col += 1){
+			var minX = col * TILE_WIDTH;
+			var minY = row * TILE_HEIGHT;
+			
+			// place a safe zone or an alley
+			var tileNum = groundData[ctr]
+			if(tileNum == 33){
+				Crafty.e("2D, safe").
+					attr({x: minX, y: minY, z: 1});
+			}
+			else if(tileNum == 17 || tileNum == 18){
+				Crafty.e("2D, alley").
+					attr({x: minX, y: minY, z: 1});
+			}
+			
+			
+			// place a no-walk barrier
+			tileNum = noWalkData[ctr];
+			if(tileNum != 0){
+				Crafty.e("2D, no_walk")
+					.attr({x: minX, y: minY, z: 1});
+			}
+			
+			// place an enemy
+			tileNum = enemyData[ctr];
+			if(tileNum == 102){
+				
+				// create a "radius of enmity" around the enemy's center
 				var offsetX = minX - (ENEMY_EFFECT_RADIUS - TILE_WIDTH / 2);
 				var offsetY = minY - (ENEMY_EFFECT_RADIUS - TILE_HEIGHT / 2);
 				Crafty.e("2D, DOM, enemy_range")
-						.attr({x: offsetX, y: offsetY, z: 2});
-			}
-			ctr += 1;
-		}
-	}
-	
-	// now initialize the can't-walk-here blocks
-	ctr = 0;
-	
-	for(var row = 0; row < mapHeight; row += 1){
-		for(var col = 0; col < mapWidth; col += 1){
-			var tileNum = houseData[ctr];
-			if(tileNum != 0){
-				var minX = col * TILE_WIDTH;
-				var minY = row * TILE_HEIGHT;
-				Crafty.e("2D, no_walk")
-					.attr({x: minX, y: minY, z: 1});
+						.attr({x: offsetX, y: offsetY, z: 2});	
 			}
 			
 			ctr += 1;
@@ -347,7 +392,11 @@ function healthDownBySec(){
 	if(inEnemyRange){
 		PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT, PLAYER_CURRENT_HEALTH - PLAYER_LOSE_HEALTH_RATE);
 		hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
-	
+		frameDelay.delay(healthDownBySec, PLAYER_LOSE_HEALTH_DELAY);
+	}
+	else if(inAlley){
+		PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT, PLAYER_CURRENT_HEALTH - PLAYER_LOSE_HEALTH_RATE_ALLEY);
+		hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
 		frameDelay.delay(healthDownBySec, PLAYER_LOSE_HEALTH_DELAY);
 	}
 	else{
