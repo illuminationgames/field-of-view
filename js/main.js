@@ -1,11 +1,16 @@
 var SCREEN_WIDTH = 800;
 var SCREEN_HEIGHT = 600;
-
 var MAP_WIDTH = 3200;
 var MAP_HEIGHT = 2400;
+var TILE_WIDTH = 50;
+var TILE_HEIGHT = 50;
+
 
 var PLAYER_WIDTH = 50;
 var PLAYER_HEIGHT = 100;
+
+var GOAL_X = 3000;
+var GOAL_Y = 3000;
 var PLAYER_START_X = 200;
 var PLAYER_START_Y = 200;
 
@@ -15,6 +20,8 @@ var DOM_OR_CANVAS = "DOM";
 
 var BG_MAP_SRC = "art/map_placeholder1.png";
 var PLAYER_SRC = "art/placeholderspritesheet_avatar.png";
+var TILEMAP_SRC = "art/placeholder_streettiles.png";
+var MAP_SRC = "map/test.json";
 
 // globals
 var player;
@@ -22,6 +29,12 @@ var ctx;
 
 var frameParser;
 var frame_count = 0;
+
+
+/**
+Build our sprites below
+*/
+
 
 Crafty.sprite(1, BG_MAP_SRC, {
 	map: [0, 0, MAP_WIDTH, MAP_HEIGHT]
@@ -31,6 +44,26 @@ Crafty.sprite(PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SRC, {
 	player: [0, 0]
 });
 
+Crafty.sprite(TILE_WIDTH, TILE_HEIGHT, TILEMAP_SRC, {
+	street1: [0, 0],
+	street2: [1, 0],
+	sidewalk1: [0, 1],
+	sidewalk2: [1, 1],
+	sidewalk3: [3, 1],
+	sidewalk4: [4, 1],
+	sidewalk5: [5, 1],
+	sidewalk6: [6, 1],
+	sidewalk7: [7, 1],
+	sidewalk8: [8, 1],
+	alley1: [0, 2],
+	alley2: [1, 2],
+	clutter: [0, 3],
+	safe: [0, 4]
+});
+
+/**
+The function called to begin Crafty
+*/
 window.onload = function () {
     //start crafty
     Crafty.init(MAP_WIDTH, MAP_HEIGHT);	// currently using DOM
@@ -39,11 +72,14 @@ window.onload = function () {
 	Crafty.scene("loading");
 };
 
-//the loading screen that will display while our assets load
+
+/**
+the loading screen that will display while our assets load
+*/
 Crafty.scene("loading", function () {
 	console.log("in loading");
     //load takes an array of assets and a callback when complete
-    Crafty.load([BG_MAP_SRC, PLAYER_SRC], function () {
+    Crafty.load([BG_MAP_SRC, PLAYER_SRC, TILEMAP_SRC], function () {
         Crafty.scene("main"); //when everything is loaded, run the main scene
     });
 
@@ -54,6 +90,10 @@ Crafty.scene("loading", function () {
             .css({ "text-align": "center" });
 });
 
+
+/**
+The initialization function for our main scene.
+*/
 Crafty.scene("main", function () {
     console.log("in main");	
 	
@@ -66,6 +106,10 @@ Crafty.scene("main", function () {
 
 	frameDelay = Crafty.e('Delay');
 	frameDelay.delay(eachFrame, FRAME_DELAY);
+	
+	// load the JSON map file and call generateMap when it does
+	$.getJSON(MAP_SRC, generateMap);
+	
 });
 
 //method to generate the map
@@ -135,6 +179,17 @@ function generateWorld() {
 }
 
 
+/**
+Function to load the map file
+*/
+function generateMap(json){
+	// test whether the map has been loaded
+	console.log(json);
+}
+
+/**
+Helper function called on each frame
+*/
 function eachFrame() {
 	// console.log("Frame " + frame_count);
 	frame_count++;
