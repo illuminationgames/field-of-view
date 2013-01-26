@@ -14,8 +14,8 @@ var SHADOW_HEIGHT = 13;
 
 var GOAL_X = 3000;
 var GOAL_Y = 3000;
-var PLAYER_START_X = 200;
-var PLAYER_START_Y = 200;
+var PLAYER_START_X = 0;
+var PLAYER_START_Y = 1150;
 
 var FRAME_DELAY = 20;
 
@@ -25,16 +25,22 @@ var BG_MAP_SRC = "art/map_placeholder1.png";
 var PLAYER_SRC = "art/placeholderspritesheet_avatar.png";
 var SHADOW_SRC = "art/placeholder_shadow.png";
 var TILEMAP_SRC = "art/placeholder_streettiles.png";
-var MAP_SRC = "map/test.json";
+var ENEMYRANGE_SRC = "art/enemy_radius.png";
+var MAP_SRC = "map/field-view-map1.json";
 
-var PLAYER_HEALTH = 100;
-
-
+// damage variables
+var PLAYER_MAX_HEALTH = 250;
+var PLAYER_CURRENT_HEALTH = 250;
+var PLAYER_LOSE_LIMIT = 49;
+var ENEMY_EFFECT_RADIUS = 100;
+var ENEMY_DISTANCE_MULTIPLIER = .2;
 
 
 // globals
 var player;
 var ctx;
+var enemies;
+var enemiesByRadius;
 
 var frameParser;
 var frame_count = 0;
@@ -57,21 +63,26 @@ Crafty.sprite(SHADOW_WIDTH, SHADOW_HEIGHT, SHADOW_SRC, {
 	shadow: [0, 0]
 });
 
+Crafty.sprite(200, 200, ENEMYRANGE_SRC, {
+	enemy_range: [0, 0]
+});
+
 Crafty.sprite(TILE_WIDTH, TILE_HEIGHT, TILEMAP_SRC, {
 	street1: [0, 0],
 	street2: [1, 0],
 	sidewalk1: [0, 1],
 	sidewalk2: [1, 1],
-	sidewalk3: [3, 1],
-	sidewalk4: [4, 1],
-	sidewalk5: [5, 1],
-	sidewalk6: [6, 1],
-	sidewalk7: [7, 1],
-	sidewalk8: [8, 1],
+	sidewalk3: [2, 1],
+	sidewalk4: [3, 1],
+	sidewalk5: [4, 1],
+	sidewalk6: [5, 1],
+	sidewalk7: [6, 1],
+	sidewalk8: [7, 1],
 	alley1: [0, 2],
 	alley2: [1, 2],
 	clutter: [0, 3],
-	safe: [0, 4]
+	safe: [0, 4],
+	no_walk: [1, 4]
 });
 
 var TILE_LIST = new Array(new Array("street1", "street2"), 
@@ -104,7 +115,7 @@ the loading screen that will display while our assets load
 Crafty.scene("loading", function () {
 	console.log("in loading");
     //load takes an array of assets and a callback when complete
-    Crafty.load([BG_MAP_SRC, PLAYER_SRC, TILEMAP_SRC, SHADOW_SRC], function () {
+    Crafty.load([BG_MAP_SRC, PLAYER_SRC, TILEMAP_SRC, SHADOW_SRC, ENEMYRANGE_SRC], function () {
         Crafty.scene("main"); //when everything is loaded, run the main scene
     });
 
@@ -197,28 +208,45 @@ function generateWorld() {
 			shadow.y = player.y + 87;
 	
 				// block handles objects the player can't just walk through
-				if(shadow.hit('clutter') || this.x < 0 || this.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
+				if(shadow.hit('clutter') || shadow.hit('no_walk') || this.x < 0 || this.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
 					this.attr({x: from.x, y:from.y});
 					shadow.attr({x: from.x, y:from.y + 87});
 				}
 				
 				// block handles safe spaces
-				if(shadow.hit('safe')){
-					
+				if(player.hit('safe')){
+					var distMult = 2;//distance(player.x, player.y, hitObj.x, hitObj.y) * ENEMY_DISTANCE_MULTIPLIER;
+					PLAYER_CURRENT_HEALTH = Math.min(PLAYER_MAX_HEALTH, PLAYER_CURRENT_HEALTH + distMult);
+					hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
 				}
 				
 				
 				// block handles danger zones
-				if(player.hit('danger')){
+				if(player.hit('enemy_range')){
+					console.log("hit aggro");
+					// at the moment, garbage cans are dangerous
+					//var hitObj = player.hit('enemy_range')[0].obj;
+					var distMult = 1;//distance(player.x, player.y, hitObj.x, hitObj.y) * ENEMY_DISTANCE_MULTIPLIER;
+					PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT, PLAYER_CURRENT_HEALTH - distMult);
+					hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
+				}
+				
+				// block handles getting home safely
+				if(player.hit('home')){
 					
 				}
 				hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 2 + Crafty.viewport.y)
 			})
 
 	window.hbCanvas = new HeartbeatCanvas();
-	hbCanvas.moveTo(player._x + player._w / 2 + Crafty.viewport.x, player._y + player._h / 2 + Crafty.viewport.y)
+	hbCanvas.moveTo(player._x + player._w / 2 + Crafty.viewport.x, player._y + player._h / 2 + Crafty.viewport.y);
 	hbCanvas._draw();
-	hbCanvas.setPulse(60);
+	//hbCanvas.setPulse(60);
+	hbCanvas.setVisibility(250);	// 50 is game over limit
+	
+	// initialize our list of enemies
+	enemies = new Array();
+	enemiesByRadius = new Object();
 }
 
 
@@ -232,6 +260,8 @@ function generateMap(json){
 	var mapWidth = mapLayer1.width;
 	var mapHeight = mapLayer1.height;
 	var mapData = mapLayer1.data;
+	var mapLayer2 = json.layers[1];
+	var houseData = mapLayer2.data;
 	// console.log(mapData);
 	
 	MAP_WIDTH = mapWidth * TILE_WIDTH;
@@ -247,8 +277,38 @@ function generateMap(json){
 				continue;
 			}
 			var rowCol = linToRowCol(tileNum - 1, TILEMAP_ACROSS, TILEMAP_DOWN);
+			var blockType = TILELABEL_LIST[rowCol[0]][rowCol[1]];
+			var minX = col * TILE_WIDTH;
+			var minY = row * TILE_HEIGHT;
+			
+			// create the new block
 			Crafty.e("2D, DOM, " + TILE_LIST[rowCol[0]][rowCol[1]] + ", " + TILELABEL_LIST[rowCol[0]][rowCol[1]])
-					.attr({x: col * TILE_WIDTH, y: row * TILE_HEIGHT, z: 1});
+					.attr({x: minX, y: minY, z: 1});
+					
+			// create a "radius of enmity" around the block's center
+			if(blockType == "clutter"){
+				var offsetX = minX - (ENEMY_EFFECT_RADIUS - TILE_WIDTH / 2);
+				var offsetY = minY - (ENEMY_EFFECT_RADIUS - TILE_HEIGHT / 2);
+				Crafty.e("2D, DOM, enemy_range")
+						.attr({x: offsetX, y: offsetY, z: 2});
+			}
+			ctr += 1;
+		}
+	}
+	
+	// now initialize the can't-walk-here blocks
+	ctr = 0;
+	
+	for(var row = 0; row < mapHeight; row += 1){
+		for(var col = 0; col < mapWidth; col += 1){
+			var tileNum = houseData[ctr];
+			if(tileNum != 0){
+				var minX = col * TILE_WIDTH;
+				var minY = row * TILE_HEIGHT;
+				Crafty.e("2D, DOM, no_walk")
+					.attr({x: minX, y: minY, z: 1});
+			}
+			
 			ctr += 1;
 		}
 	}
@@ -272,5 +332,12 @@ function linToRowCol(linIndex, width, height){
 	console.log("linIndex: " + linIndex + ", row: " + row + ", col: " + col);
 	
 	return new Array(row, col);
+}
+
+/**
+Helper function gets distance between two sets of x, y points
+*/
+function distance(x1, y1, x2, y2){
+	return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 }
 
