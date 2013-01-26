@@ -260,7 +260,13 @@ function generateWorld() {
 							this.stop().animate("huddled_walk", 20, -1);
 					}
 				}
-				else if(player.hit('alley')){
+				else{
+					inEnemyRange = false;
+					if (!this.isPlaying("walk"))
+						this.stop().animate("walk", 20, -1);
+				}
+				
+				if(player.hit('alley')){
 					if(!inAlley){
 						inAlley = true;
 						healthDownBySec();
@@ -269,7 +275,7 @@ function generateWorld() {
 					}
 				}
 				else{
-					inEnemyRange = false;
+					inAlley = false;
 					if (!this.isPlaying("walk"))
 						this.stop().animate("walk", 20, -1);
 				}
