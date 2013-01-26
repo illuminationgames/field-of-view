@@ -62,19 +62,12 @@ Crafty.sprite(TILE_WIDTH, TILE_HEIGHT, TILEMAP_SRC, {
 	safe: [0, 4]
 });
 
-var TILE_LIST = new Array("street1", "street2", "sidewalk1", "sidewalk2", "sidewalk3", "sidewalk4", "sidewalk5", "sidewalk6", "sidewalk7", "sidewalk8",
-						"alley1", "alley2", "clutter", "safe");
-						
-var STREET_MIN = 1;
-var STREET_MAX = 2;
-var SIDEWALK_MIN = 3;
-var SIDEWALK_MAX = 10;
-var ALLEY_MIN = 11;
-var ALLEY_MAX = 12;
-var CLUTTER_MIN = 13;
-var CLUTTER_MAX = 13;
-var SAFE_MIN = 14;
-var SAFE_MAX = 14;
+var TILE_LIST = new Array(new Array("street1", "street2"), 
+						new Array("sidewalk1", "sidewalk2", "sidewalk3", "sidewalk4", "sidewalk5", "sidewalk6", "sidewalk7", "sidewalk8"),
+						new Array("alley1", "alley2"), 
+						new Array("clutter"),
+						new Array("safe"));
+
 
 
 /**
@@ -115,6 +108,7 @@ Crafty.scene("main", function () {
 	
 	// create the camera
 	Crafty.viewport.init(SCREEN_WIDTH, SCREEN_HEIGHT);
+	Crafty.viewport.clampToEntities = false;
 	//Crafty.viewport.mouselook(true);
 	
 	generateWorld();
@@ -130,8 +124,7 @@ Crafty.scene("main", function () {
 
 //method to generate the map
 function generateWorld() {
-	// create a giant map at 0, 0, and z-pos 1, lowest (I think)
-	Crafty.e("2D, " + DOM_OR_CANVAS + ", map").attr({x: 0, y: 0, z: 1});
+	//Crafty.e("2D, " + DOM_OR_CANVAS + ", map").attr({x: 0, y: 0, z: 1});
 	
 	Crafty.c("playerControls", {
 		init: function() {
@@ -147,7 +140,7 @@ function generateWorld() {
 
 	Crafty.c("playerAnim", {
 		init: function() {
-		  this.requires('SpriteAnimation, Grid')
+		  this.requires('SpriteAnimation, Collision, Grid')
 			  .animate('stand', 0, 0, 0)
 			  .animate('walk', 0, 0, 2)
 		}
@@ -184,9 +177,9 @@ function generateWorld() {
 			// draw a thing after the player
 	
 				//Crafty.viewport.centerOn(player, 1);
-				/*if(this.hit('solid')){
+				if(this.hit('solid') || this.x < 0 || this.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
 					this.attr({x: from.x, y:from.y});
-				}*/
+				}
 				hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 2 + Crafty.viewport.y)
 			})
 
@@ -207,32 +200,26 @@ function generateMap(json){
 	var mapWidth = mapLayer1.width;
 	var mapHeight = mapLayer1.height;
 	var mapData = mapLayer1.data;
-	console.log(mapData);
+	// console.log(mapData);
+	
+	MAP_WIDTH = mapWidth * TILE_WIDTH;
+	MAP_HEIGHT = mapHeight * TILE_HEIGHT;
+	
+	// test
+	//console.log($('#cr-stage').width);
+	//console.log($('#cr-stage').height);
 	var ctr = 0;
 	
 	for(var row = 0; row < mapHeight; row += 1){
 		for(var col = 0; col < mapWidth; col += 1){
 			var tileNum = mapData[ctr];
-			console.log(tileNum);
-			Crafty.e("2D, DOM, " + TILE_LIST[tileNum - 1] + ", street")
-					.attr({x: col * TILE_WIDTH, y: row * TILE_HEIGHT, z: 1});
-			
-			/*if(tileNum >= STREET_MIN && tileNum <= STREET_MAX){
-				Crafty.e("2D, DOM, " + TILE_LIST[tileNum - 1] + ", street")
-					.attr({x: col * TILE_WIDTH, y: row * TILE_HEIGHT, z: 1});
+			if(tileNum == 0){
+				ctr += 1;
+				continue;
 			}
-			else if(tileNum >= SIDEWALK_MIN && tileNum <= SIDEWALK_MAX){
-				Crafty.e("2D, DOM, " + TILE_LIST[tileNum-1] + ", sidewalk")
+			var rowCol = linToRowCol(tileNum - 1, TILEMAP_ACROSS, TILEMAP_DOWN);
+			Crafty.e("2D, DOM, " + TILE_LIST[rowCol[0]][rowCol[1]] + ", street")
 					.attr({x: col * TILE_WIDTH, y: row * TILE_HEIGHT, z: 1});
-			}
-			else if(tileNum >= ALLEY_MIN && tileNum <= CLUTTER_MAX){
-				Crafty.e("2D, DOM, " + TILE_LIST[tileNum-1] + ", alley")
-					.attr({x: col * TILE_WIDTH, y: row * TILE_HEIGHT, z: 1});
-			}
-			else{
-				Crafty.e("2D, DOM, " + TILE_LIST[tileNum-1] + ", safe")
-					.attr({x: col * TILE_WIDTH, y: row * TILE_HEIGHT, z: 1});
-			}*/
 			ctr += 1;
 		}
 	}
@@ -245,5 +232,16 @@ function eachFrame() {
 	// console.log("Frame " + frame_count);
 	frame_count++;
 	frameDelay.delay(eachFrame, FRAME_DELAY);
+}
+
+/**
+Helper function converts a linear index to an array containing [row, col] coordinates, given the width and height of the array.
+*/
+function linToRowCol(linIndex, width, height){
+	var row = Math.floor(linIndex / width);
+	var col = linIndex % width;
+	console.log("linIndex: " + linIndex + ", row: " + row + ", col: " + col);
+	
+	return new Array(row, col);
 }
 
