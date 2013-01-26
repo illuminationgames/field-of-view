@@ -196,10 +196,21 @@ function generateWorld() {
 			shadow.x = player.x;
 			shadow.y = player.y + 87;
 	
-				//Crafty.viewport.centerOn(player, 1);
+				// block handles objects the player can't just walk through
 				if(shadow.hit('clutter') || this.x < 0 || this.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
 					this.attr({x: from.x, y:from.y});
 					shadow.attr({x: from.x, y:from.y + 87});
+				}
+				
+				// block handles safe spaces
+				if(shadow.hit('safe')){
+					
+				}
+				
+				
+				// block handles danger zones
+				if(player.hit('danger')){
+					
 				}
 				hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 2 + Crafty.viewport.y)
 			})
@@ -226,9 +237,6 @@ function generateMap(json){
 	MAP_WIDTH = mapWidth * TILE_WIDTH;
 	MAP_HEIGHT = mapHeight * TILE_HEIGHT;
 	
-	// test
-	//console.log($('#cr-stage').width);
-	//console.log($('#cr-stage').height);
 	var ctr = 0;
 	
 	for(var row = 0; row < mapHeight; row += 1){
