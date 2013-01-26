@@ -14,6 +14,9 @@ var FRAME_DELAY = 20;
 var BG_MAP_SRC = "art/map_placeholder1.png";
 var PLAYER_SRC = "art/placeholderspritesheet_avatar.png";
 
+// globals
+var player;
+
 var frameParser;
 var frame_count = 0;
 
@@ -27,7 +30,7 @@ Crafty.sprite(PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SRC, {
 
 window.onload = function () {
     //start crafty
-    Crafty.init(SCREEN_WIDTH, SCREEN_HEIGHT);	// currently using DOM
+    Crafty.init(MAP_WIDTH, MAP_HEIGHT);	// currently using DOM
     //Crafty.canvas.init();
 	
 	//automatically play the loading scene
@@ -50,9 +53,15 @@ Crafty.scene("loading", function () {
 });
 
 Crafty.scene("main", function () {
-    console.log("in main");
-	generateWorld();
+    console.log("in main");	
 	
+	// create the camera
+	Crafty.viewport.init(SCREEN_WIDTH, SCREEN_HEIGHT);
+	//Crafty.viewport.mouselook(true);
+	
+	generateWorld();
+	Crafty.viewport.follow(player, 1, 1);
+
 	frameDelay = Crafty.e('Delay');
 	//frameDelay.delay(eachFrame, FRAME_DELAY);
 });
@@ -72,6 +81,8 @@ function generateWorld() {
 		}
 	});
 	
+	//create our player entity
+
 	Crafty.c("playerAnim", {
 		init: function() {
 		  this.requires('SpriteAnimation, Grid')
@@ -80,12 +91,11 @@ function generateWorld() {
 		}
 	});
 	
-	//create our player entity
-	var player1 = Crafty.e("2D, DOM, player, playerAnim, playerControls")
+	player = Crafty.e("2D, DOM, player, playerAnim, playerControls")
         .attr({ x: PLAYER_START_X, y: PLAYER_START_Y, z: 1 });
+	player.fourway(4);
 	
-	player1.fourway(2);
-	player1.bind("NewDirection",
+	player.bind("NewDirection",
 				function (direction) {
 					if (direction.x != 0 || direction.y != 0) {
 						if (!this.isPlaying("walk"))
@@ -108,16 +118,18 @@ function generateWorld() {
 					}
 				});
 	
-	// create the camera
-//	Crafty.viewport.init(SCREEN_WIDTH, SCREEN_HEIGHT);
-//	Crafty.viewport.follow(player1, 0, 0);
+	player.bind('Moved', function(from) {
+				//Crafty.viewport.centerOn(player, 1);
+				/*if(this.hit('solid')){
+					this.attr({x: from.x, y:from.y});
+				}*/
+			})
 }
 
 
-/*function eachFrame() {
+function eachFrame() {
 	// console.log("Frame " + frame_count);
 	frame_count++;
 	frameDelay.delay(eachFrame, FRAME_DELAY);
-	
-}*/
+}
 
