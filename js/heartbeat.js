@@ -14,6 +14,7 @@ function HeartbeatCanvas() {
 		height:1200
 	}).appendTo('#cr-stage');
 	this.canvasElem = $('<canvas id="hb-canvas" width="1600" height="1200">').appendTo(this.backdrop);
+	this.lastDeltas = [];
 	this.moveTo(400,300);
 	this.ctx = this.canvasElem[0].getContext('2d');
 	this.beats = [];
@@ -53,6 +54,9 @@ $.extend(HeartbeatCanvas.prototype, {
 	setVisibility: function(targetVis) {
 		this.targetVis = targetVis;
 		this.visSpeed = (targetVis - this.visibility) * 3;
+	},
+	setHomeDirection: function(x, y) {
+		this._homeDirection = Math.atan2(y, x);
 	},
 	_setVisibility: function(maxVis) {
 		this.visibility = this.beatMax = maxVis;
@@ -160,6 +164,13 @@ $.extend(HeartbeatCanvas.prototype, {
 	},
 	_animFrame: function(timestamp) {
 		var delta = (timestamp - this.lastFrame) / 1000.0;
+		/*
+		this.lastDeltas.push(delta);
+		if (this.lastDeltas.length > 50) {
+			console.log(this.lastDeltas);
+			this.lastDeltas = [];
+		}
+		*/
 		this.lastFrame = timestamp;
 		for (var b = 0; b < this.beats.length; b++) {
 			var beat = this.beats[b];
