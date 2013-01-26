@@ -54,7 +54,7 @@ Crafty.scene("main", function () {
 	generateWorld();
 	
 	frameDelay = Crafty.e('Delay');
-	frameDelay.delay(eachFrame, FRAME_DELAY);
+	//frameDelay.delay(eachFrame, FRAME_DELAY);
 });
 
 //method to generate the map
@@ -75,8 +75,8 @@ function generateWorld() {
 	Crafty.c("playerAnim", {
 		init: function() {
 		  this.requires('SpriteAnimation, Grid')
-			  .animate('stand', 0, 0, 1)
-			  .animate('walk', 1, 0, 3)
+			  .animate('stand', 0, 0, 0)
+			  .animate('walk', 0, 0, 2)
 		}
 	});
 	
@@ -84,10 +84,10 @@ function generateWorld() {
 	var player1 = Crafty.e("2D, DOM, player, playerAnim, playerControls")
         .attr({ x: PLAYER_START_X, y: PLAYER_START_Y, z: 1 });
 	
-	player1.fourway(5);
+	player1.fourway(2);
 	player1.bind("NewDirection",
 				function (direction) {
-					if (direction.x != 0 && direction.y != 0) {
+					if (direction.x != 0 || direction.y != 0) {
 						if (!this.isPlaying("walk"))
 							this.stop().animate("walk", 20, -1);
 					}
@@ -104,7 +104,7 @@ function generateWorld() {
 							this.stop().animate("walk_down", 10, -1);
 					}*/
 					else if(!direction.x && !direction.y) {
-						this.stop().animate("stand", 200, -1);
+						this.stop().animate("stand", 20, -1);
 					}
 				});
 	
@@ -114,10 +114,10 @@ function generateWorld() {
 }
 
 
-function eachFrame() {
+/*function eachFrame() {
 	// console.log("Frame " + frame_count);
 	frame_count++;
 	frameDelay.delay(eachFrame, FRAME_DELAY);
 	
-}
+}*/
 
