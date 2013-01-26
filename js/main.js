@@ -127,7 +127,11 @@ function generateWorld() {
 				/*if(this.hit('solid')){
 					this.attr({x: from.x, y:from.y});
 				}*/
+				hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 2 + Crafty.viewport.y)
 			})
+
+	window.hbCanvas = new HeartbeatCanvas();
+	hbCanvas.draw();
 }
 
 
