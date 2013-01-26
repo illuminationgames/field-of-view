@@ -28,12 +28,11 @@ function HeartbeatCanvas() {
 	this.targetVisibility = false;
 	this.visSpeed = false;
 	this._setVisibility(this.beatMax);
-	/*
+	this.lastClone = -1;
 	lowLag.init({'urlPrefix':'audio/','debug':'none'});
 	lowLag.load(["Heartbeat1.wav"], 'Heartbeat1');
 	lowLag.load(["Heartbeat2.wav"], 'Heartbeat2');
 	lowLag.load(["Heartbeat3.wav"], 'Heartbeat3');
-	*/
 	/*
 		Crafty.audio.add({
 			Heartbeat1: "audio/Heartbeat1.wav",
@@ -137,7 +136,8 @@ $.extend(HeartbeatCanvas.prototype, {
 		}
 		this.beat(this.beatMax, this.beatSpeed);
 		var soundFile = this._pulseToSoundFile(this.pulse);
-		//lowLag.play(soundFile);
+		this.lastClone = (this.lastClone + 1) % 5;
+		lowLag.play(soundFile, this.lastClone);
 		window.setTimeout(function() {self.beat(self.beatMax, self.beatSpeed);}, this._soundFileToDelay(soundFile));
 		this._pulseInterval = window.setTimeout($.proxy(this,'_pulseBeat'), 60000.0 / this.pulse);
 	},

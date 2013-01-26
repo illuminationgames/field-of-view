@@ -221,20 +221,34 @@ lowLag.msg('audioTag loading '+urls+' as tag ' + tag);
 		$("#lowLag").append(buf);
 	}
 
-	this.playSoundAudioTag = function(tag){
+	this.playSoundAudioTag = function(tag, cloneNum){
 		lowLag.msg("playSoundAudioTag "+tag);
 
 		var modelId = lowLag.audioTagNameToElement[tag];
-		var cloneId = "lowLagCloneElem_"+lowLag.audioTagID++;
-		$('#'+modelId).clone()
-			.attr('id', cloneId)
-			.appendTo('#lowLag');
-		var cloneElem = document.getElementById(cloneId);
-lowLag.msg(tag);
-		if(lowLag.audioTagTimeToLive != -1){
-			setTimeout(function(){
-					$('#'+cloneId).remove();
-				},lowLag.audioTagTimeToLive);
+		var cloneId, cloneElem;
+		if (typeof(cloneNum) == 'undefined') {
+			cloneId = "lowLagCloneElem_"+lowLag.audioTagID++;
+			$('#'+modelId).clone()
+				.attr('id', cloneId)
+				.appendTo('#lowLag');
+			cloneElem = document.getElementById(cloneId);
+	lowLag.msg(tag);
+			if(lowLag.audioTagTimeToLive != -1){
+				setTimeout(function(){
+						$('#'+cloneId).remove();
+					},lowLag.audioTagTimeToLive);
+			}
+		} else if (cloneNum === 0) {
+			cloneElem = document.getElementById(modelId);
+		} else {
+			cloneId = modelId+'_clone'+cloneNum;
+			cloneElem = document.getElementById(cloneId);
+			if (!cloneElem) {
+				$('#'+modelId).clone()
+					.attr('id', cloneId)
+					.appendTo('#lowLag');
+				cloneElem = document.getElementById(cloneId);
+			}
 		}
 		cloneElem.play();
 	    
