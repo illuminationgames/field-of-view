@@ -131,7 +131,9 @@ function generateWorld() {
 			})
 
 	window.hbCanvas = new HeartbeatCanvas();
-	hbCanvas.draw();
+	hbCanvas.moveTo(player._x + player._w / 2 + Crafty.viewport.x, player._y + player._h / 2 + Crafty.viewport.y)
+	hbCanvas._draw();
+	hbCanvas.setPulse(60);
 }
 
 
