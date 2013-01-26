@@ -11,11 +11,14 @@ var PLAYER_START_Y = 200;
 
 var FRAME_DELAY = 20;
 
+var DOM_OR_CANVAS = "DOM";
+
 var BG_MAP_SRC = "art/map_placeholder1.png";
 var PLAYER_SRC = "art/placeholderspritesheet_avatar.png";
 
 // globals
 var player;
+var ctx;
 
 var frameParser;
 var frame_count = 0;
@@ -31,7 +34,6 @@ Crafty.sprite(PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SRC, {
 window.onload = function () {
     //start crafty
     Crafty.init(MAP_WIDTH, MAP_HEIGHT);	// currently using DOM
-    //Crafty.canvas.init();
 	
 	//automatically play the loading scene
 	Crafty.scene("loading");
@@ -63,13 +65,13 @@ Crafty.scene("main", function () {
 	Crafty.viewport.follow(player, 1, 1);
 
 	frameDelay = Crafty.e('Delay');
-	//frameDelay.delay(eachFrame, FRAME_DELAY);
+	frameDelay.delay(eachFrame, FRAME_DELAY);
 });
 
 //method to generate the map
 function generateWorld() {
 	// create a giant map at 0, 0, and z-pos 1, lowest (I think)
-	Crafty.e("2D, DOM, map").attr({x: 0, y: 0, z: 1});
+	Crafty.e("2D, " + DOM_OR_CANVAS + ", map").attr({x: 0, y: 0, z: 1});
 	
 	Crafty.c("playerControls", {
 		init: function() {
@@ -119,6 +121,8 @@ function generateWorld() {
 				});
 	
 	player.bind('Moved', function(from) {
+			// draw a thing after the player
+	
 				//Crafty.viewport.centerOn(player, 1);
 				/*if(this.hit('solid')){
 					this.attr({x: from.x, y:from.y});
