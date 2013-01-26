@@ -22,7 +22,7 @@ Crafty.sprite(1, BG_MAP_SRC, {
 });
 
 Crafty.sprite(PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SRC, {
-	player: [0, 0, PLAYER_WIDTH, PLAYER_HEIGHT]
+	player: [0, 0]
 });
 
 window.onload = function () {
@@ -75,8 +75,8 @@ function generateWorld() {
 	Crafty.c("playerAnim", {
 		init: function() {
 		  this.requires('SpriteAnimation, Grid')
-			  .animate('stand', 0, 0, 0)
-			  .animate('walk', 0, 1, 2)
+			  .animate('stand', 0, 0, 1)
+			  .animate('walk', 1, 0, 3)
 		}
 	});
 	
@@ -87,9 +87,9 @@ function generateWorld() {
 	player1.fourway(5);
 	player1.bind("NewDirection",
 				function (direction) {
-					if (direction.x < 0) {
+					if (direction.x != 0 && direction.y != 0) {
 						if (!this.isPlaying("walk"))
-							this.stop().animate("walk", 10, -1);
+							this.stop().animate("walk", 20, -1);
 					}
 					/*if (direction.x > 0) {
 						if (!this.isPlaying("walk_right"))
@@ -104,7 +104,7 @@ function generateWorld() {
 							this.stop().animate("walk_down", 10, -1);
 					}*/
 					else if(!direction.x && !direction.y) {
-						this.stop().animate("stand", 10, -1);
+						this.stop().animate("stand", 200, -1);
 					}
 				});
 	
