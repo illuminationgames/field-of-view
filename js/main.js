@@ -21,7 +21,7 @@ var FRAME_DELAY = 20;
 
 var DOM_OR_CANVAS = "DOM";
 
-var BG_MAP_SRC = "art/map_placeholder1.png";
+var BG_MAP_SRC = "art/field-view-1.png";
 var PLAYER_SRC = "art/placeholderspritesheet_avatar.png";
 var SHADOW_SRC = "art/placeholder_shadow.png";
 var TILEMAP_SRC = "art/placeholder_streettiles.png";
@@ -35,6 +35,14 @@ var PLAYER_LOSE_LIMIT = 49;
 var ENEMY_EFFECT_RADIUS = 100;
 var ENEMY_DISTANCE_MULTIPLIER = .2;
 
+var PLAYER_LOSE_HEALTH_RATE = 5;
+var PLAYER_LOSE_HEALTH_DELAY = 500;
+var PLAYER_GAIN_HEALTH_RATE = 10;
+var PLAYER_GAIN_HEALTH_DELAY = 500;
+
+// states
+var inEnemyRange = false;
+var inSafeArea = false;
 
 // globals
 var player;
@@ -45,6 +53,7 @@ var enemiesByRadius;
 var frameParser;
 var frame_count = 0;
 
+var doonce = 0;
 
 /**
 Build our sprites below
@@ -142,7 +151,7 @@ Crafty.scene("main", function () {
 	Crafty.viewport.follow(player, 1, 1);
 
 	frameDelay = Crafty.e('Delay');
-	frameDelay.delay(eachFrame, FRAME_DELAY);
+	//frameDelay.delay(eachFrame, FRAME_DELAY);
 	
 	// load the JSON map file and call generateMap when it does
 	$.getJSON(MAP_SRC, generateMap);
@@ -151,7 +160,7 @@ Crafty.scene("main", function () {
 
 //method to generate the map
 function generateWorld() {
-	//Crafty.e("2D, " + DOM_OR_CANVAS + ", map").attr({x: 0, y: 0, z: 1});
+	Crafty.e("2D, " + DOM_OR_CANVAS + ", map").attr({x: 0, y: 0, z: 1});
 	
 	Crafty.c("playerControls", {
 		init: function() {
@@ -208,33 +217,38 @@ function generateWorld() {
 			shadow.y = player.y + 87;
 	
 				// block handles objects the player can't just walk through
-				if(shadow.hit('clutter') || shadow.hit('no_walk') || this.x < 0 || this.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
+				if(shadow.hit('clutter') || shadow.hit('no_walk') || this.x < 0 || shadow.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
 					this.attr({x: from.x, y:from.y});
 					shadow.attr({x: from.x, y:from.y + 87});
 				}
 				
 				// block handles safe spaces
 				if(player.hit('safe')){
-					var distMult = 2;//distance(player.x, player.y, hitObj.x, hitObj.y) * ENEMY_DISTANCE_MULTIPLIER;
-					PLAYER_CURRENT_HEALTH = Math.min(PLAYER_MAX_HEALTH, PLAYER_CURRENT_HEALTH + distMult);
-					hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
+					if(!inSafeArea){
+						inSafeArea = true;
+						healthUpBySec();
+					}
 				}
-				
+				else{
+					inSafeArea = false;
+				}
 				
 				// block handles danger zones
 				if(player.hit('enemy_range')){
-					console.log("hit aggro");
-					// at the moment, garbage cans are dangerous
-					//var hitObj = player.hit('enemy_range')[0].obj;
-					var distMult = 1;//distance(player.x, player.y, hitObj.x, hitObj.y) * ENEMY_DISTANCE_MULTIPLIER;
-					PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT, PLAYER_CURRENT_HEALTH - distMult);
-					hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
+					if(!inEnemyRange){
+						inEnemyRange = true;
+						healthDownBySec();
+					}
+				}
+				else{
+					inEnemyRange = false;
 				}
 				
 				// block handles getting home safely
 				if(player.hit('home')){
 					
 				}
+				
 				hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 2 + Crafty.viewport.y)
 			})
 
@@ -254,12 +268,13 @@ function generateWorld() {
 Function to load the map file
 */
 function generateMap(json){
+	
 	// test whether the map has been loaded
 	var mapLayer1 = json.layers[0];
-	//console.log(mapLayer1);
 	var mapWidth = mapLayer1.width;
 	var mapHeight = mapLayer1.height;
 	var mapData = mapLayer1.data;
+	
 	var mapLayer2 = json.layers[1];
 	var houseData = mapLayer2.data;
 	// console.log(mapData);
@@ -282,7 +297,7 @@ function generateMap(json){
 			var minY = row * TILE_HEIGHT;
 			
 			// create the new block
-			Crafty.e("2D, DOM, " + TILE_LIST[rowCol[0]][rowCol[1]] + ", " + TILELABEL_LIST[rowCol[0]][rowCol[1]])
+			Crafty.e("2D, " + TILE_LIST[rowCol[0]][rowCol[1]] + ", " + TILELABEL_LIST[rowCol[0]][rowCol[1]])
 					.attr({x: minX, y: minY, z: 1});
 					
 			// create a "radius of enmity" around the block's center
@@ -305,7 +320,7 @@ function generateMap(json){
 			if(tileNum != 0){
 				var minX = col * TILE_WIDTH;
 				var minY = row * TILE_HEIGHT;
-				Crafty.e("2D, DOM, no_walk")
+				Crafty.e("2D, no_walk")
 					.attr({x: minX, y: minY, z: 1});
 			}
 			
@@ -323,13 +338,47 @@ function eachFrame() {
 	frameDelay.delay(eachFrame, FRAME_DELAY);
 }
 
+
+/**
+Helper function sets player health down each second
+*/
+function healthDownBySec(){
+	//console.log("Health down to " + PLAYER_CURRENT_HEALTH);
+	if(inEnemyRange){
+		PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT, PLAYER_CURRENT_HEALTH - PLAYER_LOSE_HEALTH_RATE);
+		hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
+	
+		frameDelay.delay(healthDownBySec, PLAYER_LOSE_HEALTH_DELAY);
+	}
+	else{
+		return;
+	}
+}
+
+/**
+Helper function sets player health gain each second
+*/
+function healthUpBySec(){
+	//console.log("Health up to " + PLAYER_CURRENT_HEALTH);
+	if(inSafeArea){
+		PLAYER_CURRENT_HEALTH = Math.min(PLAYER_MAX_HEALTH, PLAYER_CURRENT_HEALTH + PLAYER_GAIN_HEALTH_RATE);
+		hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
+	
+		frameDelay.delay(healthUpBySec, PLAYER_GAIN_HEALTH_DELAY);
+	}
+	else{
+		return;
+	}	
+}
+
+
 /**
 Helper function converts a linear index to an array containing [row, col] coordinates, given the width and height of the array.
 */
 function linToRowCol(linIndex, width, height){
 	var row = Math.floor(linIndex / width);
 	var col = linIndex % width;
-	console.log("linIndex: " + linIndex + ", row: " + row + ", col: " + col);
+	// console.log("linIndex: " + linIndex + ", row: " + row + ", col: " + col);
 	
 	return new Array(row, col);
 }
