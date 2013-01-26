@@ -4,7 +4,8 @@ var MAP_WIDTH = 3200;
 var MAP_HEIGHT = 2400;
 var TILE_WIDTH = 50;
 var TILE_HEIGHT = 50;
-
+var TILEMAP_ACROSS = 8;
+var TILEMAP_DOWN = 5;
 
 var PLAYER_WIDTH = 50;
 var PLAYER_HEIGHT = 100;
@@ -60,6 +61,21 @@ Crafty.sprite(TILE_WIDTH, TILE_HEIGHT, TILEMAP_SRC, {
 	clutter: [0, 3],
 	safe: [0, 4]
 });
+
+var TILE_LIST = new Array("street1", "street2", "sidewalk1", "sidewalk2", "sidewalk3", "sidewalk4", "sidewalk5", "sidewalk6", "sidewalk7", "sidewalk8",
+						"alley1", "alley2", "clutter", "safe");
+						
+var STREET_MIN = 1;
+var STREET_MAX = 2;
+var SIDEWALK_MIN = 3;
+var SIDEWALK_MAX = 10;
+var ALLEY_MIN = 11;
+var ALLEY_MAX = 12;
+var CLUTTER_MIN = 13;
+var CLUTTER_MAX = 13;
+var SAFE_MIN = 14;
+var SAFE_MAX = 14;
+
 
 /**
 The function called to begin Crafty
@@ -138,7 +154,7 @@ function generateWorld() {
 	});
 	
 	player = Crafty.e("2D, DOM, player, playerAnim, playerControls")
-        .attr({ x: PLAYER_START_X, y: PLAYER_START_Y, z: 1 });
+        .attr({ x: PLAYER_START_X, y: PLAYER_START_Y, z: 10 });
 	player.fourway(4);
 	
 	player.bind("NewDirection",
@@ -186,7 +202,40 @@ Function to load the map file
 */
 function generateMap(json){
 	// test whether the map has been loaded
-	console.log(json);
+	var mapLayer1 = json.layers[0];
+	//console.log(mapLayer1);
+	var mapWidth = mapLayer1.width;
+	var mapHeight = mapLayer1.height;
+	var mapData = mapLayer1.data;
+	console.log(mapData);
+	var ctr = 0;
+	
+	for(var row = 0; row < mapHeight; row += 1){
+		for(var col = 0; col < mapWidth; col += 1){
+			var tileNum = mapData[ctr];
+			console.log(tileNum);
+			Crafty.e("2D, DOM, " + TILE_LIST[tileNum - 1] + ", street")
+					.attr({x: col * TILE_WIDTH, y: row * TILE_HEIGHT, z: 1});
+			
+			/*if(tileNum >= STREET_MIN && tileNum <= STREET_MAX){
+				Crafty.e("2D, DOM, " + TILE_LIST[tileNum - 1] + ", street")
+					.attr({x: col * TILE_WIDTH, y: row * TILE_HEIGHT, z: 1});
+			}
+			else if(tileNum >= SIDEWALK_MIN && tileNum <= SIDEWALK_MAX){
+				Crafty.e("2D, DOM, " + TILE_LIST[tileNum-1] + ", sidewalk")
+					.attr({x: col * TILE_WIDTH, y: row * TILE_HEIGHT, z: 1});
+			}
+			else if(tileNum >= ALLEY_MIN && tileNum <= CLUTTER_MAX){
+				Crafty.e("2D, DOM, " + TILE_LIST[tileNum-1] + ", alley")
+					.attr({x: col * TILE_WIDTH, y: row * TILE_HEIGHT, z: 1});
+			}
+			else{
+				Crafty.e("2D, DOM, " + TILE_LIST[tileNum-1] + ", safe")
+					.attr({x: col * TILE_WIDTH, y: row * TILE_HEIGHT, z: 1});
+			}*/
+			ctr += 1;
+		}
+	}
 }
 
 /**
