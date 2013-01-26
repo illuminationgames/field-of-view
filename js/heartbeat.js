@@ -1,5 +1,5 @@
 function HeartbeatCanvas() {
-	console.log('hb-init');
+	//console.log('hb-init');
 	this.canvasElem = $('<canvas id="hb-canvas" width="1600" height="1200">').appendTo('#cr-stage');
 	this.canvasElem.css({
 		position: 'absolute',
@@ -11,14 +11,14 @@ function HeartbeatCanvas() {
 
 $.extend(HeartbeatCanvas.prototype, {
 	moveTo: function(x, y) {
-		console.log('hb-moveto',x,y);
+		//console.log('hb-moveto',x,y);
 		this.canvasElem.css({
 			left: x - 800,
 			top: y - 600
 		});
 	},
 	draw: function() {
-		console.log('hb-draw');
+		//console.log('hb-draw');
 		var ctx = this.ctx;
 		ctx.save();
 		ctx.strokeStyle = '#FF0000';
