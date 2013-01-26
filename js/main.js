@@ -11,9 +11,8 @@ var PLAYER_START_Y = 200;
 
 var FRAME_DELAY = 20;
 
-var BG_MAP_SRC = "ART/PLACEHOLDER/MAP/map_placeholder1.png";
-var PLAYER_SRC = "ART/pc_sheet.png";
-var TILE_SRC = "ART/bananabomber-sprites.png";
+var BG_MAP_SRC = "art/map_placeholder1.png";
+var PLAYER_SRC = "art/placeholderspritesheet_avatar.png";
 
 var frameParser;
 var frame_count = 0;
@@ -25,22 +24,6 @@ Crafty.sprite(1, BG_MAP_SRC, {
 Crafty.sprite(PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SRC, {
 	player: [0, 0, PLAYER_WIDTH, PLAYER_HEIGHT]
 });
-
-// build our spritesheet (are we using tiles? How do we want to arrange our map?)
-//turn the sprite map into usable components
-/*Crafty.sprite(16, TILE_SRC, {
-    grass1: [0, 0],
-    grass2: [1, 0],
-    grass3: [2, 0],
-    grass4: [3, 0],
-    flower: [0, 1],
-    bush1: [0, 2],
-    bush2: [1, 2],
-    player: [0, 3],
-    enemy: [0, 3],
-    banana: [4, 0],
-    empty: [4, 0]
-});*/
 
 window.onload = function () {
     //start crafty
@@ -55,7 +38,7 @@ window.onload = function () {
 Crafty.scene("loading", function () {
 	console.log("in loading");
     //load takes an array of assets and a callback when complete
-    Crafty.load([BG_MAP_SRC, PLAYER_SRC, TILE_SRC], function () {
+    Crafty.load([BG_MAP_SRC, PLAYER_SRC], function () {
         Crafty.scene("main"); //when everything is loaded, run the main scene
     });
 
@@ -83,12 +66,10 @@ function generateWorld() {
 		init: function() {
 			this.requires('Fourway');
 		},
-		
 		playerMove: function(speed) {
 			this.fourway(speed);
 			return this;
 		}
-		
 	});
 	
 	Crafty.c("playerAnim", {
@@ -104,6 +85,28 @@ function generateWorld() {
         .attr({ x: PLAYER_START_X, y: PLAYER_START_Y, z: 1 });
 	
 	player1.fourway(5);
+	player1.bind("NewDirection",
+				function (direction) {
+					if (direction.x < 0) {
+						if (!this.isPlaying("walk"))
+							this.stop().animate("walk", 10, -1);
+					}
+					/*if (direction.x > 0) {
+						if (!this.isPlaying("walk_right"))
+							this.stop().animate("walk_right", 10, -1);
+					}
+					if (direction.y < 0) {
+						if (!this.isPlaying("walk_up"))
+							this.stop().animate("walk_up", 10, -1);
+					}
+					if (direction.y > 0) {
+						if (!this.isPlaying("walk_down"))
+							this.stop().animate("walk_down", 10, -1);
+					}*/
+					else if(!direction.x && !direction.y) {
+						this.stop().animate("stand", 10, -1);
+					}
+				});
 	
 	// create the camera
 //	Crafty.viewport.init(SCREEN_WIDTH, SCREEN_HEIGHT);
