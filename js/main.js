@@ -153,7 +153,7 @@ Crafty.scene("main", function () {
 	
 	// create the camera
 	Crafty.viewport.init(SCREEN_WIDTH, SCREEN_HEIGHT);
-	Crafty.viewport.clampToEntities = false;
+	Crafty.viewport.clampToEntities = true;
 	//Crafty.viewport.mouselook(true);
 	
 	generateWorld();
@@ -240,7 +240,8 @@ function generateWorld() {
 			shadow.y = player.y + 87;
 	
 				// block handles objects the player can't just walk through
-				if(shadow.hit('clutter') || shadow.hit('no_walk') || this.x < 0 || shadow.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
+				if(shadow.hit('clutter') || shadow.hit('no_walk') || shadow.hit('enemy')
+					|| this.x < 0 || shadow.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
 					this.attr({x: from.x, y:from.y});
 					shadow.attr({x: from.x, y:from.y + 87});
 				}
