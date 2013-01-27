@@ -253,7 +253,7 @@ $.extend(HeartbeatCanvas.prototype, {
 			ctx.stroke();
 
 			ctx.lineWidth = 2;
-			ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+			ctx.strokeStyle = 'rgba(255,255,255,0.9)';
 			var arcWidth = Math.PI / 3 * beat.opacity;
 			ctx.beginPath();
 			ctx.arc(800, 600, beat.radius, this._homeDirection - arcWidth, this._homeDirection + arcWidth);
