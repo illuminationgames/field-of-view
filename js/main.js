@@ -225,7 +225,7 @@ Crafty.scene("end", function () {
 	}
 	else{
 		// won
-		
+		Crafty.background("#fff");
 	}
 });
 
