@@ -169,8 +169,8 @@ $.extend(HeartbeatCanvas.prototype, {
 		this._lastScare = scare;
 		scare.play();
 	},
-	defend: function() {
-		if (this._lastScare) {
+	defend: function(stopAttack) {
+		if (this._lastScare && stopAttack) {
 			this._lastScare.stop();
 		}
 		var defense = this._lastDefense;
