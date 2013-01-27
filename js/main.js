@@ -553,7 +553,7 @@ function generateMap(json){
 				var enemy = Crafty.e("2D, DOM, enemy, enemyAnim")
 						.attr({x: minX, y: minY, z: 1});
 
-				enemy.animate("stand_normal", 70, -1);
+				enemy.animate("stand_normal", 500, -1);
 				enemy.canScare = true;
 				enemy.isScaring = false;
 				
