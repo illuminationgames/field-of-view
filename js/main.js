@@ -43,10 +43,10 @@ var MAP_SRC = "map/field-view-map1.json";
 var PLAYER_MAX_HEALTH = 250;
 var PLAYER_CURRENT_HEALTH = 250;
 var PLAYER_LOSE_LIMIT = 50;
-var ENEMY_EFFECT_RADIUS = 100;
-//var ENEMY_SCARE_RADIUS = 200;
-//var ENEMY_EFFECT_RADIUS = 200;
+var ENEMY_SCARE_RADIUS = 100;
+var ENEMY_EFFECT_RADIUS = 200;
 var ENEMY_DISTANCE_MULTIPLIER = .2;
+var SELF_DEFENSE_TIMEOUT = 3000;
 
 var PLAYER_LOSE_HEALTH_RATE = 10;
 var PLAYER_LOSE_HEALTH_RATE_ALLEY = 3;
@@ -59,6 +59,8 @@ var ENEMY_JUMP_SCARE_LOSS = 50;
 var inEnemyRange = false;
 var inAlley = false;
 var inSafeArea = false;
+var scaringEnemy = null; // What enemy is currently scaring us?
+var scareTime = null; // When did the scare happen?
 
 // end state
 var WIN_OR_LOSE = 0;	// 1 for win, -1 for lose
@@ -339,11 +341,59 @@ function generateWorld() {
 			inSafeArea = false;
 		}
 		hbCanvas.isSafe(inSafeArea);
-		
-		// block handles danger zones
+
+
+		var footprintX = footprint._x + FOOTPRINT_WIDTH / 2;
+		var footprintY = footprint._y + FOOTPRINT_HEIGHT / 2;
+
+
+		// Check to see if we're being threatened by a new enemy, first
 		if(hitObject = footprint.hit('enemy_range')){
+			for(var ctr = 0; ctr < hitObject.length; ctr += 1){
+				var obj = hitObject[ctr].obj;
+				var checkEnemy = obj.enemy;
+				//console.log("Checking threat: ", obj.has('enemy_range'), footprintX, footprintY, checkEnemy.canScare, checkEnemy.threatRadius);
+				if(obj.has('enemy_range') && checkEnemy && checkEnemy.canScare && checkEnemy.threatRadius.containsPoint(footprintX, footprintY)) {
+					// We have a new, scary enemy.  Do a jump scare and set scaring to true.
+					checkEnemy.isScaring = true;
+					scaringEnemy = checkEnemy;
+
+					checkEnemy.canScare = false;
+
+					console.log("jump scare!", checkEnemy);
+					hbCanvas.scare();
+
+					playerLoseHealth(ENEMY_JUMP_SCARE_LOSS);
+					break;
+				}
+			}
+		}
+
+		// If we're currently being threatened, make sure we're still in the enemy range
+		if (scaringEnemy && !scaringEnemy.effectRadius.containsPoint(footprintX, footprintY)) {
+			console.log("Unscared");
+			scaringEnemy = null;
+		}
+
+		// If we're not currently being threatened, see if we're in range of an
+		// actively-scary enemy
+		if(!scaringEnemy && (hitObject = footprint.hit('enemy_minorrange'))){
+			for(var ctr = 0; ctr < hitObject.length; ctr += 1){
+				obj = hitObject[ctr].obj;
+				checkEnemy = obj.enemy;
+				//console.log("Checking minor threat: ", footprintX, footprintY, obj);
+				if(obj.has('enemy_minorrange') && checkEnemy && checkEnemy.isScaring && checkEnemy.effectRadius.containsPoint(footprintX, footprintY)) {
+					console.log("Re-scare",checkEnemy);
+					scaringEnemy = checkEnemy;
+					break;
+				}
+			}
+		}
+
+
+		// block handles danger zones
+		if (scaringEnemy) {
 			if(!inEnemyRange){
-				console.log("In range",footprint.x,footprint.y);
 				inEnemyRange = true;
 				healthDownBySec();
 			}
@@ -368,34 +418,7 @@ function generateWorld() {
 				this.stop().animate("walk", 20, -1);
 		}
 		
-		// block handles enemy jump scare
-		if(hitObject = footprint.hit('enemy')){
-			for(var ctr = 0; ctr < hitObject.length; ctr += 1){
-				var obj = hitObject[ctr].obj;
-				if(obj.has('enemy')){
-					// jump scare
-					if(typeof obj.jumpScare === "undefined"){
-						obj.jumpScare = true;
-						console.log("jump scare!");
-						hbCanvas.scare();
-						PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT, PLAYER_CURRENT_HEALTH - ENEMY_JUMP_SCARE_LOSS);
-						hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
-						
-						if(PLAYER_CURRENT_HEALTH == PLAYER_LOSE_LIMIT){
-							// lose
-							WIN_OR_LOSE = -1;
-							inEnemyRange = false;
-							inAlley = false;
-							hbCanvas.setVisibility(0);
-							Crafty.scene("end");
-						}
-					}
-				}
-			}
-		}
-
 		this.setSpeed(inEnemyRange, inAlley);
-
 		
 		this.syncCanvas(hbCanvas);
 	})
@@ -484,16 +507,25 @@ function generateMap(json){
 			if(tileNum == 102){
 				var enemy = Crafty.e("2D, DOM, enemy")
 						.attr({x: minX, y: minY, z: 1});
+
+				enemy.canScare = true;
+				enemy.isScaring = false;
 				
 				// create a "radius of enmity" around the enemy's center
 				var centerX = minX + TILE_WIDTH / 2;
 				var centerY = minY + TILE_HEIGHT * 3 / 2;
 				var offsetX = centerX - ENEMY_EFFECT_RADIUS;
 				var offsetY = centerY - ENEMY_EFFECT_RADIUS;
-				Crafty.e("2D, DOM, enemy_minorrange")
-						.attr({x: centerX - 200, y: centerY - 200, z: 2});
-				Crafty.e("2D, DOM, enemy_range")
-						.attr({x: offsetX, y: offsetY, z: 2});
+				var effectrange = Crafty.e("2D, DOM, enemy_minorrange")
+						.attr({x: centerX - ENEMY_EFFECT_RADIUS, y: centerY - ENEMY_EFFECT_RADIUS, z: 2});
+				var threatrange = Crafty.e("2D, DOM, enemy_range")
+						.attr({x: centerX - ENEMY_SCARE_RADIUS, y: centerY - ENEMY_SCARE_RADIUS, z: 2});
+				threatrange.enemy = enemy;
+				effectrange.enemy = enemy;
+
+				// Set circular radii for scare/continuing effect
+				enemy.threatRadius = new Crafty.circle(centerX, centerY, ENEMY_SCARE_RADIUS + FOOTPRINT_WIDTH / 2);
+				enemy.effectRadius = new Crafty.circle(centerX, centerY, ENEMY_EFFECT_RADIUS + FOOTPRINT_WIDTH / 2);
 			}
 			
 			ctr += 1;
@@ -510,31 +542,40 @@ function eachFrame() {
 	frameDelay.delay(eachFrame, FRAME_DELAY);
 }
 
+/**
+Helper function drops player health by an amount, returns true if player lost
+*/
+function playerLoseHealth(amount) {
+	PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT - 1, PLAYER_CURRENT_HEALTH - amount);
+	hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
+			
+	if(PLAYER_CURRENT_HEALTH < PLAYER_LOSE_LIMIT){
+		// lose
+		WIN_OR_LOSE = -1;
+		inEnemyRange = false;
+		inAlley = false;
+		hbCanvas.setVisibility(0);
+		Crafty.scene("end");
+		return true;
+	}
+	return false;
+}
+
 
 /**
 Helper function sets player health down each second
 */
 function healthDownBySec(){
 	//console.log("Health down to " + PLAYER_CURRENT_HEALTH);
-	
-	if(PLAYER_CURRENT_HEALTH == PLAYER_LOSE_LIMIT){
-		// lose
-		inEnemyRange = false;
-		inAlley = false;
-		hbCanvas.setVisibility(0);
-		WIN_OR_LOSE = -1;
-		Crafty.scene("end");
-	}
-
 	if(inEnemyRange){
-		PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT, PLAYER_CURRENT_HEALTH - PLAYER_LOSE_HEALTH_RATE);
-		hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
-		frameDelay.delay(healthDownBySec, PLAYER_LOSE_HEALTH_DELAY);
+		if (!playerLoseHealth(PLAYER_LOSE_HEALTH_RATE)) {
+			frameDelay.delay(healthDownBySec, PLAYER_LOSE_HEALTH_DELAY);
+		}
 	}
 	else if(inAlley){
-		PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT, PLAYER_CURRENT_HEALTH - PLAYER_LOSE_HEALTH_RATE_ALLEY);
-		hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
-		frameDelay.delay(healthDownBySec, PLAYER_LOSE_HEALTH_DELAY);
+		if (!playerLoseHealth(PLAYER_LOSE_HEALTH_RATE_ALLEY)) {
+			frameDelay.delay(healthDownBySec, PLAYER_LOSE_HEALTH_DELAY);
+		}
 	}
 	else{
 		return;
