@@ -14,12 +14,12 @@
  </tileset>
  <layer name="Walk Areas" width="64" height="48">
   <data encoding="base64" compression="zlib">
-   eJztmtsOgyAMhtnudtJtd176/i85zSQhhkMpLQP3/0mvgNJvM7RUjQnrsdjtwDZE2FddFzsf2C4E/pP5Pgd3jw2J8VbNxk3lt/Pmne3Hc3zF9N5sIsw127ycNdRYwA9+af6nkT+3e+GXOLN9+/XAv/7vWue2y/8KWIwrJHfe5LEc/pD2v+lMjMfVGkuI28dPlbufz2dL/CnjqBd+LdV4/rnxtLCfRDxSd6zUXYajGvzWh3ROlFBNfu4dinqXKYmtBj/Xh+aZAH7w5/L78rlmTuesd+vlEt/g758/VlOMJn5nT41TrNSHXc/l/3UPtlYvN8RPqS1Ka5OS/jDVx8jkj6mF3KSR3/6dn9v/0tpH2wfXJ/jBD37wg5/WY9boj7bCn3q/oNUfB38b/Jr7aPvg+gQ/+MEPfvD7lepxluZPag7V6rmCX46fUz9Ta2ht/pq9aekYSuJq4d28RAzcnrnEN2u5vWmtGEJxfQDXcTbV
+   eJztmtsOgyAMhtnudtJtd176/i85zSQhhkMpLQP3/0mvgNJvM7RUjQnrsdjtwDZE2FddFzsf2C4E/pP5Pgd3jw2J8VbNxk3lt/Pmne3Hc3zF9N5sIsw127ycNdRYwA9+af6nkT+3e+GXOLN9+/XAv/7vWue2y/8KWIwrJHfe5LEc/pD2v+lMjMfVGkuI28dPlbufz2dL/CnjqBd+LdV4/rnxtLCfRDxSd6zUXYajGvzWh3ROlFBNfu4dinqXKYmtBj/Xh+aZAH7w5/L78rlmTuesd+vlEt/g758/VlOMJn5nT41TrNSHXc/l/3UPtlYvN8RPqS1Ka5OS/jDVx8jkj6mF3KSR3/6dn9v/0tpH2wfXJ/jBD37wg5/WY9boj7bCn3q/oNUfB38b/Jr7aPvg+gQ/+MEPfvCHFetxluZPag7V6rmCX46fUz9Ta2ht/pq9aekYSuJq4d28RAzcnrnEN2u5vWmtGEJxfQD/hzZy
   </data>
  </layer>
  <layer name="No Walk/ Home" width="64" height="48">
   <data encoding="base64" compression="zlib">
-   eJztlksOgzAMRHsWVr3/CbusRGN7xj9I8UhRFbDHeSUxvF5rHcL1p2j4n60zv/V/HMaoil2ti42XeLS5Fe/1yqjL+FeuQ/PKeP5S3bvzZ2j4ZW92v2j+0tyKZ3I98vBE+l8knu3FaF9g1vkWhrZmRp5nrPFb14b/+4uMu/IzA8mV6kT50fPIKLsvVvMzc0TDn6vd+dl+gK5hJ/6K/C5+5lkhnpbuyI/6IZ6WGH7rHcl678Rv5Xi/N1b3tbreb5po/2NjdtXw58RIeZG92aHu88+ezQ4Plh+N6+jNFR6WZ1Xt4Y/lZ3lYnlW1hz+Wn+VheVbV/kf+6m9TZA1Refm76mo5w9+3juH/nT/5/E//j9UZfl7DH/ewPL21rZ6X0T8RfiZf8lgJ4ddyst+fSM1ovBY3/Nje0u5Hhe5xb/w5N1MZ579TFfxXr+HK2nfl/wBm5FTz
+   eJztll0OwkAIhD1Ln7z/CX00qQvM8NeuZZLGrMLAZ3dpX6+1DuH7p2j4n60zv/V/HMZVFbvqi42XeLS1Fe/1yqjL+Ff2oXll3H+p7t35MzT8sje7XzR/aW3FM7keeXgi8y8Sz85idC4wfb6FS+uZkecea/zWd8P//USuu/IzF5Ir1Ynyo+eRUfZcrOZn1oiGP1e787PzAO1hJ/6K/C5+5l4hnpbuyI/6IZ6WGH7rGcl678Rv5XjfN1a/a3W97zTR+cfG7Krhz4mR8iJ7s0Pd5589mx0eLD8a1zGbKzwsz6rawx/Lz/KwPKtqD38sP8vD8qyq/Y/81e+mSA9Refm76mo5w9/Xx/D/rp98/mf+x+oMP6/hj3tYnpHa2szLmJ/eHqR8yWMltLa0zn5+oj1E4rW44cf2p7b3okL3uDf+nJupjPPfqQr+q3u4svZd+T//PVTz
   </data>
  </layer>
  <layer name="Bad" width="64" height="48">
