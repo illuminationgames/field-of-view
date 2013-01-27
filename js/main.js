@@ -60,6 +60,7 @@ var PLAYER_LOSE_HEALTH_DELAY = 500;
 var PLAYER_GAIN_HEALTH_RATE = 10;
 var PLAYER_GAIN_HEALTH_DELAY = 500;
 var ENEMY_JUMP_SCARE_LOSS = 50;
+var SELF_DEFENSE_REGEN_RATE = .75;
 
 // states
 var inEnemyRange = false;
@@ -470,7 +471,7 @@ function generateWorld() {
 						inEnemyRange = false;
 						player.setSpeed(inEnemyRange, inAlley);
 					}
-					playerGainHealth(ENEMY_JUMP_SCARE_LOSS / 2);
+					playerGainHealth(ENEMY_JUMP_SCARE_LOSS * SELF_DEFENSE_REGEN_RATE);
 					scaringEnemy = null;
 				}
 
