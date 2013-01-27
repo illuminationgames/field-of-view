@@ -70,13 +70,20 @@ body {
 	width: 800px;
 	height: 600px;
 	position: absolute;
-	display: none;
 	z-index: 10;
+}
+
+.invisible{
+	display: none;
 }
 
 .gameOverlay a:active{
 	color: #bbbbbb;
 	text-decoration: none;
+}
+
+#cr-instructions {
+	display: block;
 }
 
         

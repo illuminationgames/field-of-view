@@ -78,6 +78,7 @@ var frameParser;
 var frame_count = 0;
 
 var doonce = 0;
+var seenInstructions = false;
 
 /**
 Build our sprites below
@@ -146,14 +147,24 @@ var TILELABEL_LIST = new Array(new Array("street", "street"),
 The function called to begin Crafty
 */
 window.onload = function () {
-    //start crafty
-    Crafty.init(MAP_WIDTH, MAP_HEIGHT);	// currently using DOM
-	
-	// Load heartbeat overlay
-	window.hbCanvas = new HeartbeatCanvas();
-	
-	//automatically play the loading scene
-	Crafty.scene("loading");
+	var gamePos = $('#cr-stage').position();
+	//$('#cr-instructions').css({'display': 'block'});
+	$('#cr-instructions').css({top: gamePos.top, left: gamePos.left});
+
+	$('#cr-instructions').on('click', function() {
+		if(!seenInstructions){
+			$('#cr-instructions').css({display: 'none'});
+			seenInstructions = true;
+			//start crafty
+			Crafty.init(MAP_WIDTH, MAP_HEIGHT);	// currently using DOM
+			
+			// Load heartbeat overlay
+			window.hbCanvas = new HeartbeatCanvas();
+			
+			//automatically play the loading scene
+			Crafty.scene("loading");
+		}
+	});
 };
 
 
