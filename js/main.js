@@ -199,6 +199,11 @@ function generateWorld() {
 	
 	player.bind("NewDirection",
 				function (direction) {
+						if(direction.x > 0)
+							this.flip('X');
+						else if(direction.x < 0)
+							this.unflip('X');
+				
 					if (direction.x != 0 || direction.y != 0) {
 						if(inEnemyRange || inAlley){
 							if (!this.isPlaying("huddled_walk"))
