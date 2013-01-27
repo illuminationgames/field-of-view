@@ -11,9 +11,9 @@ function HeartbeatCanvas() {
 		position:'absolute',
 		zIndex:2,
 		width:1600,
-		height:1200
+		height:1600 /* Extend a little further down than 1200 */
 	}).appendTo('#cr-stage');
-	this.canvasElem = $('<canvas id="hb-canvas" width="1600" height="1200">').appendTo(this.backdrop);
+	this.canvasElem = $('<canvas id="hb-canvas" width="1600" height="1600">').appendTo(this.backdrop);
 	this.lastDeltas = [];
 	this.moveTo(400,300);
 	this.ctx = this.canvasElem[0].getContext('2d');
@@ -87,7 +87,7 @@ $.extend(HeartbeatCanvas.prototype, {
 		//console.log('hb-moveto',x,y);
 		this.backdrop.css({
 			left: x - 800,
-			top: y - 600
+			top: y - 800
 		});
 	},
 	disable: function() {
@@ -278,7 +278,7 @@ $.extend(HeartbeatCanvas.prototype, {
 			ctx.lineWidth = 1;
 			ctx.strokeStyle = 'rgba(255,255,255,'+beat.opacity+')';
 			ctx.beginPath();
-			ctx.arc(800, 600, beat.radius, 0, Math.PI * 2);
+			ctx.arc(800, 800, beat.radius, 0, Math.PI * 2);
 			ctx.closePath();
 			ctx.stroke();
 
@@ -286,7 +286,7 @@ $.extend(HeartbeatCanvas.prototype, {
 			ctx.strokeStyle = 'rgba(255,255,255,1)';
 			var arcWidth = Math.PI / 4 * beat.opacity;
 			ctx.beginPath();
-			ctx.arc(800, 600, beat.radius, this._homeDirection - arcWidth, this._homeDirection + arcWidth);
+			ctx.arc(800, 800, beat.radius, this._homeDirection - arcWidth, this._homeDirection + arcWidth);
 			ctx.stroke();
 		}
 		ctx.restore();

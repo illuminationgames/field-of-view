@@ -13,11 +13,16 @@ var ENEMY_WIDTH = 50;
 var ENEMY_HEIGHT = 100;
 var SHADOW_WIDTH = 50;
 var SHADOW_HEIGHT = 13;
+var SHADOW_OFFSET = 87;
+var FOOTPRINT_WIDTH = 30;
+var FOOTPRINT_HEIGHT = 30;
+var FOOTPRINT_OFFSETX = 10;
+var FOOTPRINT_OFFSETY = 75;
 
 var GOAL_X = 3000;
 var GOAL_Y = 3000;
 var PLAYER_START_X = 0;
-var PLAYER_START_Y = 1150;
+var PLAYER_START_Y = 1145;
 var HOME_X = 61;
 var HOME_Y = 13;
 
@@ -31,6 +36,7 @@ var SHADOW_SRC = "art/placeholder_shadow.png";
 var ENEMY_SRC = "art/placeholderspritesheet_npc.png";
 var TILEMAP_SRC = "art/placeholder_streettiles.png";
 var ENEMYRANGE_SRC = "art/enemy_radius.png";
+var ENEMYMINORRANGE_SRC = "art/enemy_minorradius.png";
 var MAP_SRC = "map/field-view-map1.json";
 
 // damage variables
@@ -38,6 +44,8 @@ var PLAYER_MAX_HEALTH = 250;
 var PLAYER_CURRENT_HEALTH = 250;
 var PLAYER_LOSE_LIMIT = 50;
 var ENEMY_EFFECT_RADIUS = 100;
+//var ENEMY_SCARE_RADIUS = 200;
+//var ENEMY_EFFECT_RADIUS = 200;
 var ENEMY_DISTANCE_MULTIPLIER = .2;
 
 var PLAYER_LOSE_HEALTH_RATE = 10;
@@ -89,6 +97,10 @@ Crafty.sprite(SHADOW_WIDTH, SHADOW_HEIGHT, SHADOW_SRC, {
 
 Crafty.sprite(200, 200, ENEMYRANGE_SRC, {
 	enemy_range: [0, 0]
+});
+
+Crafty.sprite(400, 400, ENEMYMINORRANGE_SRC, {
+	enemy_minorrange: [0, 0]
 });
 
 Crafty.sprite(TILE_WIDTH, TILE_HEIGHT, TILEMAP_SRC, {
@@ -257,8 +269,10 @@ function generateWorld() {
 	player = Crafty.e("2D, DOM, player, playerAnim, playerControls")
         .attr({ x: PLAYER_START_X, y: PLAYER_START_Y, z: 10 });
 	player.fourway(4);
-	shadow = Crafty.e("2D, DOM, shadow, Collision")
-		.attr({ x: PLAYER_START_X, y: PLAYER_START_Y + 87, z: 9 });
+	shadow = Crafty.e("2D, DOM, shadow")
+		.attr({ x: PLAYER_START_X, y: PLAYER_START_Y + SHADOW_OFFSET, z: 9 });
+	footprint = Crafty.e("2D, Collision")
+		.attr({ x: PLAYER_START_X + FOOTPRINT_OFFSETX, y: PLAYER_START_Y + FOOTPRINT_OFFSETY, w: FOOTPRINT_WIDTH, h: FOOTPRINT_HEIGHT });
 	
 	player.bind("NewDirection",
 		function (direction) {
@@ -287,16 +301,20 @@ function generateWorld() {
 	
 	player.bind('Moved', function(from) {
 		// move the shadow with the player
-		shadow.x = player.x;
-		shadow.y = player.y + 87;
+		shadow.x = player._x;
+		shadow.y = player._y + SHADOW_OFFSET;
+		footprint.x = player._x + FOOTPRINT_OFFSETX;
+		footprint.y = player._y + FOOTPRINT_OFFSETY;
 
 
 		// block handles objects the player can't just walk through
-		if(shadow.hit('clutter') || shadow.hit('no_walk') 
-			|| this.x < 0 || shadow.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
-			this.attr({x: from.x, y:from.y});
-			shadow.attr({x: from.x, y:from.y + 87});
+		if(footprint.hit('clutter') || footprint.hit('no_walk') 
+			|| this._x < 0 || footprint._y < 0 || this._x > MAP_WIDTH - PLAYER_WIDTH || this._y > MAP_HEIGHT - PLAYER_HEIGHT){
+			this.attr({_x: from.x, _y:from.y});
+			shadow.attr({x: from.x, y:from.y + SHADOW_OFFSET});
+			footprint.attr({x: from.x + FOOTPRINT_OFFSETX, y:from.y + FOOTPRINT_OFFSETY});
 		}
+
 		
 						
 		// block handles getting home safely
@@ -309,7 +327,7 @@ function generateWorld() {
 			}
 		}
 		
-		var hitObject = shadow.hit('safe');
+		var hitObject = footprint.hit('safe');
 		// block handles safe spaces
 		if(hitObject){
 			if(!inSafeArea){
@@ -323,8 +341,9 @@ function generateWorld() {
 		hbCanvas.isSafe(inSafeArea);
 		
 		// block handles danger zones
-		if(hitObject = shadow.hit('enemy_range')){
+		if(hitObject = footprint.hit('enemy_range')){
 			if(!inEnemyRange){
+				console.log("In range",footprint.x,footprint.y);
 				inEnemyRange = true;
 				healthDownBySec();
 			}
@@ -340,6 +359,9 @@ function generateWorld() {
 				this.stop().animate("huddled_walk", 20, -1);
 		}
 		else{
+			if (inEnemyRange) {
+				console.log("out of range",footprint.x,footprint.y);
+			}
 			inAlley = false;
 			inEnemyRange = false;
 			if (!this.isPlaying("walk"))
@@ -347,7 +369,7 @@ function generateWorld() {
 		}
 		
 		// block handles enemy jump scare
-		if(hitObject = shadow.hit('enemy')){
+		if(hitObject = footprint.hit('enemy')){
 			for(var ctr = 0; ctr < hitObject.length; ctr += 1){
 				var obj = hitObject[ctr].obj;
 				if(obj.has('enemy')){
@@ -464,8 +486,12 @@ function generateMap(json){
 						.attr({x: minX, y: minY, z: 1});
 				
 				// create a "radius of enmity" around the enemy's center
-				var offsetX = minX - (ENEMY_EFFECT_RADIUS - TILE_WIDTH / 2);
-				var offsetY = minY - (ENEMY_EFFECT_RADIUS - TILE_HEIGHT / 2);
+				var centerX = minX + TILE_WIDTH / 2;
+				var centerY = minY + TILE_HEIGHT * 3 / 2;
+				var offsetX = centerX - ENEMY_EFFECT_RADIUS;
+				var offsetY = centerY - ENEMY_EFFECT_RADIUS;
+				Crafty.e("2D, DOM, enemy_minorrange")
+						.attr({x: centerX - 200, y: centerY - 200, z: 2});
 				Crafty.e("2D, DOM, enemy_range")
 						.attr({x: offsetX, y: offsetY, z: 2});
 			}
