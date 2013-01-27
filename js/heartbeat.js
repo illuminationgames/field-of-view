@@ -31,13 +31,50 @@ function HeartbeatCanvas() {
 	//this._setVisibility(this.beatMax);
 	this.lastClone = -1;
 	this._homeDirection = 0;
-	lowLag.init({'urlPrefix':'audio/','debug':'none'});
-	lowLag.load(["Heartbeat1.wav"], 'Heartbeat1');
-	lowLag.load(["Heartbeat2.wav"], 'Heartbeat2');
-	lowLag.load(["Heartbeat3.wav"], 'Heartbeat3');
+	this._soundsEnabled = false;
+
+	this._safe = false;
+	this._loadSounds();
 }
 
 $.extend(HeartbeatCanvas.prototype, {
+	_soundFiles: [
+		// BGM
+		'citynight',
+		'serenity',
+
+		// Time
+		'clocktickhalf',
+		'midnight',
+
+		// Bad things
+		'whistle1',
+		'whistle2',
+		'whistle3',
+		'alleyguy',
+		'carthrough',
+		'darkvoices',
+		'evildriver'
+	],
+	_loadSounds: function() {
+		var self = this;
+
+		// (A custom verion of) lowLag is used for the heartbeats, because they have to be as instant as possible.
+		lowLag.init({'urlPrefix':'audio/','debug':'none'});
+		lowLag.load(["Heartbeat1.ogg"], 'Heartbeat1');
+		lowLag.load(["Heartbeat2.ogg"], 'Heartbeat2');
+		lowLag.load(["Heartbeat3.ogg"], 'Heartbeat3');
+
+		// Buzz is used for all the other sounds, because it allows play/stop/etc and we don't need multiple instances.
+		this._sounds = {};
+		$.each(this._soundFiles, function(_,name) {
+			self._sounds[name] = new buzz.sound("audio/"+name, {
+				formats: [ "ogg", "mp3" ]
+			});
+		});
+		this._sounds.citynight.loop();
+		//this._sounds.serenity.loop();
+	},
 	moveTo: function(x, y) {
 		//console.log('hb-moveto',x,y);
 		this.backdrop.css({
@@ -49,6 +86,28 @@ $.extend(HeartbeatCanvas.prototype, {
 		this.setPulse(false);
 		this.beats = [];
 		this._setVisibility(false);
+		this.disableSounds();
+	},
+	enableSounds: function() {
+		this._sounds.citynight.play().fadeIn(500);
+	},
+	disableSounds: function() {
+		buzz.all().fadeOut(300, function() {
+			buzz.all().stop();
+		});
+	},
+	isSafe: function(safe) {
+		var self = this;
+		if (this._safe != safe) {
+			if (safe) {
+				this._sounds.serenity.fadeIn(3000).play();
+				this._sounds.citynight.fadeTo(25,10000);
+			} else {
+				this._sounds.serenity.fadeOut(500, function() { this.stop() });
+				this._sounds.citynight.fadeIn(500);
+			}
+			this._safe = safe;
+		}
 	},
 	setVisibility: function(targetVis) {
 		if (this.pulse) {
@@ -102,8 +161,10 @@ $.extend(HeartbeatCanvas.prototype, {
 					window.clearInterval(this._pulseInterval);
 					this._pulseInterval = false;
 				}
+				this.disableSounds();
 			} else if (!this._pulseInterval) {
 				this._pulseBeat();
+				this.enableSounds();
 			}
 		}
 	},
