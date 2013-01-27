@@ -367,7 +367,8 @@ function generateMap(json){
 			// place an enemy
 			tileNum = enemyData[ctr];
 			if(tileNum == 102){
-				
+				Crafty.e("2D, DOM, enemy")
+						.attr({x: minX, y: minY, z: 1});
 				// create a "radius of enmity" around the enemy's center
 				var offsetX = minX - (ENEMY_EFFECT_RADIUS - TILE_WIDTH / 2);
 				var offsetY = minY - (ENEMY_EFFECT_RADIUS - TILE_HEIGHT / 2);
