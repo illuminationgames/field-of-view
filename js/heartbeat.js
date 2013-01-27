@@ -91,14 +91,14 @@ $.extend(HeartbeatCanvas.prototype, {
 		$.each(this._voiceFiles, function(name, counts) {
 			var curVoice = {defenses: [], attacks: []};
 			self._voices.push(curVoice);
-			for (var n = 0; n < counts[0]; n++) {
+			for (var n = 1; n <= counts[0]; n++) {
 				curVoice.defenses.push(
 					new buzz.sound("voices/voice"+name+"_defense"+n, {
 						formats: [ "ogg", "mp3" ]
 					})
 				);
 			}
-			for (var n = 0; n < counts[1]; n++) {
+			for (var n = 1; n <= counts[1]; n++) {
 				curVoice.attacks.push(
 					new buzz.sound("voices/voice"+name+"_attack"+n, {
 						formats: [ "ogg", "mp3" ]
