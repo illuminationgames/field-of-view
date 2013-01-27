@@ -35,13 +35,6 @@ function HeartbeatCanvas() {
 	lowLag.load(["Heartbeat1.wav"], 'Heartbeat1');
 	lowLag.load(["Heartbeat2.wav"], 'Heartbeat2');
 	lowLag.load(["Heartbeat3.wav"], 'Heartbeat3');
-	/*
-		Crafty.audio.add({
-			Heartbeat1: "audio/Heartbeat1.wav",
-			Heartbeat2: "audio/Heartbeat2.wav",
-			Heartbeat3: "audio/Heartbeat3.wav"
-		});
-		*/
 }
 
 $.extend(HeartbeatCanvas.prototype, {
@@ -77,15 +70,8 @@ $.extend(HeartbeatCanvas.prototype, {
 			var gradDef = 'circle '+maxRad+'px, rgba(0,0,0,0) 0px';
 			if (maxVis > 70)
 				gradDef += ', rgba(0,0,0,0.2) 50px';
-			//console.log(maxRad,maxVis,beatRad);
-			/*
-			if (beatRad >= maxVis - 40)
-				beatRad = maxVis - 40;
-			gradDef += ', rgba(0,0,0,0.3) '+(beatRad)+'px';
-			*/
 			gradDef += ', rgba(0,0,0,0.5) '+(maxVis-20)+'px';
 			gradDef += ', rgba(0,0,0,0.8) '+maxRad+'px';
-			//console.log('visdef',gradDef);
 			this.backdrop.css({
 				backgroundImage: 'radial-gradient('+gradDef+')'
 			});
@@ -140,21 +126,6 @@ $.extend(HeartbeatCanvas.prototype, {
 	},
 	_pulseBeat: function() {
 		var self = this;
-		/*
-		if (this._pulseIntervalUpdate) {
-			var newPulseTime = 60000.0 / this.pulse;
-			if (this._pulseInterval) {
-				window.clearInterval(this._pulseInterval);
-			}
-			this._pulseInterval = window.setInterval($.proxy(this,'_pulseBeat'), 50);
-			this._pulseIntervalUpdate = false;
-		}
-		var newTime = Date.now();
-		if (!forcePulse && newTime < this._nextPulse) {
-			return;
-		}
-		this._nextPulse = newTime + (60000.0 / this.pulse);
-		*/
 		if (this._pulseInterval) {
 			window.clearTimeout(this._pulseInterval);
 		}
@@ -172,11 +143,6 @@ $.extend(HeartbeatCanvas.prototype, {
 			speed: speed,
 			opacity: 1,
 		});
-		/*
-		if (this.beats.length > 4) {
-			this.beats.splice(0,1);
-		}
-		*/
 		if (this.lastFrame === false) {
 			this.lastFrame = Date.now();
 			this._animFrame(this.lastFrame);
@@ -184,22 +150,14 @@ $.extend(HeartbeatCanvas.prototype, {
 	},
 	_animFrame: function(timestamp) {
 		var delta = (timestamp - this.lastFrame) / 1000.0;
-		/*
-		this.lastDeltas.push(delta);
-		if (this.lastDeltas.length > 50) {
-			console.log(this.lastDeltas);
-			this.lastDeltas = [];
-		}
-		*/
 		this.lastFrame = timestamp;
 		for (var b = 0; b < this.beats.length; b++) {
 			var beat = this.beats[b];
-			var ratio = beat.radius / this.visibility /*beat.maxRadius*/;
+			var ratio = beat.radius / this.visibility;
 			var multiplier = 1 - 0.5 * ratio
 			beat.radius += delta * beat.speed * multiplier;
-			//beat.speed -= delta * 70;
 			beat.opacity = 1 - (0.9 * ratio * ratio);
-			if (/*beat.radius > beat.maxRadius || */beat.radius > this.visibility) {
+			if (beat.radius > this.visibility) {
 				this.beats.splice(b, 1);
 				b--;
 			}
@@ -215,11 +173,6 @@ $.extend(HeartbeatCanvas.prototype, {
 			this._setVisibility(newVis);
 		}
 
-/*
-		if (this.beats.length) {
-			this.setVisibility(this.beats[0].radius, this.beats[0].maxRadius);
-		}
-		*/
 		this._draw();
 
 		if (this.beats.length) {
@@ -233,34 +186,6 @@ $.extend(HeartbeatCanvas.prototype, {
 		var ctx = this.ctx;
 		ctx.clearRect(0,0,1600,1200);
 		if (!this.beats.length) return;
-		/*
-		ctx.save();
-		var maxRadius = this.beats[0].radius + 10;
-		var grad = ctx.createRadialGradient(800, 600, 0, 800, 600, maxRadius);
-		var lastStop = -1;
-		function addStop(pxRad, opacity) {
-			if (pxRad <= lastStop) {
-				return;
-				pxRad = lastStop + 1;
-			}
-			lastStop = pxRad;
-			grad.addColorStop(pxRad / maxRadius, 'rgba(0,0,0,'+opacity+')');
-		}
-		addStop(0, 0);
-		if (maxRadius >= 50) {
-			addStop(50, 0.2);
-		}
-		for (var b = 0; b < this.beats.length; b++) {
-			var beat = this.beats[b];
-			addStop(beat.radius-5, 1-(beat.opacity*0.8));
-			addStop(beat.radius, 1-beat.opacity);
-			addStop(beat.radius+5, 1-(beat.opacity*0.8));
-		}
-		addStop(maxRadius, 0.8);
-		ctx.fillStyle = grad;
-		ctx.fillRect(0,0,1600,1200);
-		ctx.restore();
-		*/
 		ctx.save();
 		for (var b = 0; b < this.beats.length; b++) {
 			var beat = this.beats[b];

@@ -287,22 +287,23 @@ function generateWorld() {
 						hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
 					}
 				}
-				
-				// block handles getting home safely
-				if(player.hit('home')){
-					
-				}
-				
-				hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 2 + Crafty.viewport.y)
-				hbCanvas.setHomeDirection(HOME_X * 50 - this._x, HOME_Y * 50 - this._y);
-			})
+			}
 		}
+				
+		// block handles getting home safely
+		if(player.hit('home')){
+			
+		}
+		
+		hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 2 + Crafty.viewport.y)
+		hbCanvas.setHomeDirection(HOME_X * 50 - this._x, HOME_Y * 50 - this._y);
 	})
 
 	window.hbCanvas = new HeartbeatCanvas();
-	hbCanvas.moveTo(player._x + player._w / 2 + Crafty.viewport.x, player._y + player._h / 2 + Crafty.viewport.y);
+	window.setTimeout(function() {
+		hbCanvas.moveTo(player._x + player._w / 2 + Crafty.viewport.x, player._y + player._h / 2 + Crafty.viewport.y);
+	}, 1);
 	hbCanvas.setHomeDirection(HOME_X * 50 - player._x, HOME_Y * 50 - player._y);
-	hbCanvas._draw();
 	//hbCanvas.setPulse(60);
 	hbCanvas.setVisibility(250);	// 50 is game over limit
 	
