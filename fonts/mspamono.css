@@ -1,0 +1,12 @@
+
+@font-face {
+        font-family: "MSPAMono";
+        font-weight: bold;
+        src: url("MSPAMono.ttf") format("truetype");
+}
+@font-face {
+        font-family: "MSPAMono";
+        font-weight: bold;
+        font-style: italic;
+        src: url("MSPAMonoItalic.ttf") format("truetype");
+}

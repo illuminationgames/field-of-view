@@ -207,7 +207,7 @@ Crafty.scene("end", function () {
 			.css({"text-align": "center" })
 			.css({ "color": "white"  })
 			.css({ "font-size": "14px" });
-		/*
+		
 		keyboard.bind('KeyDown', 
 			function(e) {
 				if (e.key == Crafty.keys['ENTER']) {
@@ -219,7 +219,7 @@ Crafty.scene("end", function () {
 					// redirect
 					window.location = "epilogue.html";
 				}
-			});*/
+			});
 			
 		console.log("Bound");
 	}
