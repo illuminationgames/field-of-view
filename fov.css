@@ -58,8 +58,8 @@ body {
 	border: 2px solid #ffffff;
 	margin: 5px auto;
 	text-align: center;
-	padding-left: 50px;
-	padding-right: 50px;
+	padding-left: 100px;
+	padding-right: 100px;
 	padding-top: 50px;
 	color: white;
 	font-size:18px;
@@ -67,7 +67,7 @@ body {
 	font-family: "helvetica";
 	line-height:20px;
 	font-weight:lighter;
-	width: 700px;
+	width: 600px;
 	height: 600px;
 	position: absolute;
 	z-index: 10;
