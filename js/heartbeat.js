@@ -66,12 +66,13 @@ $.extend(HeartbeatCanvas.prototype, {
 		if (maxVis === false) {
 			this.backdrop.css('background','');
 		} else if (maxVis > 20) {
-			var maxRad = maxVis + 20;
+			var maxRad = maxVis + 50;
 			var gradDef = 'circle '+maxRad+'px, rgba(0,0,0,0) 0px';
-			if (maxVis > 70)
+			if (maxVis > 100)
 				gradDef += ', rgba(0,0,0,0.2) 50px';
-			gradDef += ', rgba(0,0,0,0.5) '+(maxVis-20)+'px';
-			gradDef += ', rgba(0,0,0,0.8) '+maxRad+'px';
+			gradDef += ', rgba(0,0,0,0.5) '+(maxVis-50)+'px';
+			gradDef += ', rgba(0,0,0,0.9) '+maxVis+'px';
+			gradDef += ', rgba(0,0,0,1) '+maxRad+'px';
 			this.backdrop.css({
 				backgroundImage: 'radial-gradient('+gradDef+')'
 			});
@@ -156,7 +157,7 @@ $.extend(HeartbeatCanvas.prototype, {
 			var ratio = beat.radius / this.visibility;
 			var multiplier = 1 - 0.5 * ratio
 			beat.radius += delta * beat.speed * multiplier;
-			beat.opacity = 1 - (0.9 * ratio * ratio);
+			beat.opacity = 0.8 - (0.75 * ratio * ratio);
 			if (beat.radius > this.visibility) {
 				this.beats.splice(b, 1);
 				b--;
@@ -196,8 +197,8 @@ $.extend(HeartbeatCanvas.prototype, {
 			ctx.closePath();
 			ctx.stroke();
 
-			ctx.lineWidth = 3;
-			ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+			ctx.lineWidth = 1.5;
+			ctx.strokeStyle = 'rgba(255,255,255,1)';
 			var arcWidth = Math.PI / 4 * beat.opacity;
 			ctx.beginPath();
 			ctx.arc(800, 600, beat.radius, this._homeDirection - arcWidth, this._homeDirection + arcWidth);

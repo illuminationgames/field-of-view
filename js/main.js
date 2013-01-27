@@ -125,6 +125,9 @@ window.onload = function () {
     //start crafty
     Crafty.init(MAP_WIDTH, MAP_HEIGHT);	// currently using DOM
 	
+	// Load heartbeat overlay
+	window.hbCanvas = new HeartbeatCanvas();
+	
 	//automatically play the loading scene
 	Crafty.scene("loading");
 };
@@ -295,17 +298,18 @@ function generateWorld() {
 			
 		}
 		
-		hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 2 + Crafty.viewport.y)
-		hbCanvas.setHomeDirection(HOME_X * 50 - this._x, HOME_Y * 50 - this._y);
+		this.syncCanvas(hbCanvas);
 	})
 
-	window.hbCanvas = new HeartbeatCanvas();
+	player.syncCanvas = function(hbCanvas) {
+		hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 3 + Crafty.viewport.y)
+		hbCanvas.setHomeDirection(HOME_X * 50 - this._x, HOME_Y * 50 - this._y);
+	}
+
 	window.setTimeout(function() {
-		hbCanvas.moveTo(player._x + player._w / 2 + Crafty.viewport.x, player._y + player._h / 2 + Crafty.viewport.y);
+		player.syncCanvas(hbCanvas);
+		hbCanvas.setVisibility(250);	// 50 is game over limit
 	}, 1);
-	hbCanvas.setHomeDirection(HOME_X * 50 - player._x, HOME_Y * 50 - player._y);
-	//hbCanvas.setPulse(60);
-	hbCanvas.setVisibility(250);	// 50 is game over limit
 	
 	// initialize our list of enemies
 	enemies = new Array();
