@@ -34,7 +34,7 @@ var BG_MAP_SRC = "art/CITY_final.png";
 var BG_FLOAT_SRC = "art/CITY_FLOAT_final.png";
 var PLAYER_SRC = "art/avespritesheet.png";
 var SHADOW_SRC = "art/placeholder_shadow.png";
-var ENEMY_SRC = "art/placeholderspritesheet_npc.png";
+var ENEMY_SRC = "art/wolfspritesheet.png";
 var TILEMAP_SRC = "art/placeholder_streettiles.png";
 var ENEMYRANGE_SRC = "art/enemy_radius.png";
 var ENEMYMINORRANGE_SRC = "art/enemy_minorradius.png";
@@ -47,6 +47,7 @@ var PLAYER_LOSE_LIMIT = 50;
 var ENEMY_SCARE_RADIUS = 100;
 var ENEMY_EFFECT_RADIUS = 200;
 var ENEMY_DISTANCE_MULTIPLIER = .2;
+var IS_ENEMY_PERCENT = .3;
 var SELF_DEFENSE_TIMEOUT = 3000;
 var SELF_DEFENSE_LENGTH = 500;
 
@@ -99,6 +100,10 @@ Crafty.sprite(PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SRC, {
 
 Crafty.sprite(ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_SRC, {
 	enemy: [0, 0]
+});
+
+Crafty.sprite(ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_SRC, {
+	person: [0, 0]
 });
 
 Crafty.sprite(SHADOW_WIDTH, SHADOW_HEIGHT, SHADOW_SRC, {
@@ -530,7 +535,8 @@ function generateMap(json){
 			
 			// place an enemy
 			tileNum = enemyData[ctr];
-			if(tileNum == 102){
+			var isEnemy = Math.random();
+			if(tileNum == 102 || (tileNum == 107 && isEnemy < IS_ENEMY_PERCENT)){
 				var enemy = Crafty.e("2D, DOM, enemy")
 						.attr({x: minX, y: minY, z: 1});
 
@@ -552,6 +558,10 @@ function generateMap(json){
 				// Set circular radii for scare/continuing effect
 				enemy.threatRadius = new Crafty.circle(centerX, centerY, ENEMY_SCARE_RADIUS + FOOTPRINT_WIDTH / 2);
 				enemy.effectRadius = new Crafty.circle(centerX, centerY, ENEMY_EFFECT_RADIUS + FOOTPRINT_WIDTH / 2);
+			}
+			else if(tileNum == 107){
+				var person = Crafty.e("2D, DOM, person")
+					.attr({x: minX, y:minY, z: 1});
 			}
 			
 			ctr += 1;
