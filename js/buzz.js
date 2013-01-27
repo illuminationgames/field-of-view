@@ -91,6 +91,7 @@ var buzz = {
               return this;
             }
 
+			this.cancelFade();
             this.sound.pause();
             return this;
         };
@@ -108,6 +109,7 @@ var buzz = {
               return this;
             }
 
+			this.cancelFade();
             this.setTime( 0 );
             this.sound.pause();
             return this;
@@ -480,6 +482,14 @@ var buzz = {
             return this;
         };
 
+		this.cancelFade = function() {
+			if (this._fadeTimeout) {
+				window.clearTimeout(this._fadeTimeout);
+				this._fadeTimeout = null;
+			}
+			return this;
+		};
+
         this.fadeTo = function( to, duration, callback ) {
 			if ( !supported ) {
               return this;
@@ -495,10 +505,10 @@ var buzz = {
             var from = this.volume,
 				delay = duration / Math.abs( from - to ),
                 that = this;
-            this.play();
+            this.play().cancelFade();
 
             function doFade() {
-                setTimeout( function() {
+                that._fadeTimeout = setTimeout( function() {
                     if ( from < to && that.volume < to ) {
                         that.setVolume( that.volume += 1 );
                         doFade();

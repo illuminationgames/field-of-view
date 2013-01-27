@@ -32,6 +32,7 @@ function HeartbeatCanvas() {
 	this.lastClone = -1;
 	this._homeDirection = 0;
 	this._soundsEnabled = false;
+	this._lastScare = false;
 
 	this._safe = false;
 	this._loadSounds();
@@ -56,6 +57,11 @@ $.extend(HeartbeatCanvas.prototype, {
 		'darkvoices',
 		'evildriver'
 	],
+	scareSounds: [
+		'whistle1',
+		'whistle2',
+		'whistle3'
+	],
 	_loadSounds: function() {
 		var self = this;
 
@@ -66,12 +72,14 @@ $.extend(HeartbeatCanvas.prototype, {
 		lowLag.load(["Heartbeat3.ogg"], 'Heartbeat3');
 
 		// Buzz is used for all the other sounds, because it allows play/stop/etc and we don't need multiple instances.
+		buzz.defaults.volume = 100;
 		this._sounds = {};
 		$.each(this._soundFiles, function(_,name) {
 			self._sounds[name] = new buzz.sound("audio/"+name, {
 				formats: [ "ogg", "mp3" ]
 			});
 		});
+		buzz.all().load();
 		this._sounds.citynight.loop();
 		//this._sounds.serenity.loop();
 	},
@@ -92,22 +100,38 @@ $.extend(HeartbeatCanvas.prototype, {
 		this._sounds.citynight.play().fadeIn(500);
 	},
 	disableSounds: function() {
-		buzz.all().fadeOut(300, function() {
-			buzz.all().stop();
-		});
+		buzz.all().stop();
 	},
 	isSafe: function(safe) {
 		var self = this;
+		if (this._safe === null) {
+			// During fadeout, wait
+			return;
+		}
 		if (this._safe != safe) {
+			console.log("Setting safe:",safe);
 			if (safe) {
 				this._sounds.serenity.fadeIn(3000).play();
 				this._sounds.citynight.fadeTo(25,10000);
+				this._safe = safe;
 			} else {
-				this._sounds.serenity.fadeOut(500, function() { this.stop() });
-				this._sounds.citynight.fadeIn(500);
+				this._sounds.citynight.fadeTo(100, 500);
+				this._safe = null;
+				if (this._sounds.serenity.isEnded()) {
+					this._sounds.serenity.stop();
+					this._safe = safe;
+				} else {
+					this._sounds.serenity.fadeOut(300, function() { this.stop(); self._safe = safe;});
+				}
 			}
-			this._safe = safe;
 		}
+	},
+	scare: function() {
+		var which = this._lastScare;
+		while (which === this._lastScare) {
+			which = Math.floor(Math.random() * this.scareSounds.length);
+		}
+		this._sounds[this.scareSounds[which]].play();
 	},
 	setVisibility: function(targetVis) {
 		if (this.pulse) {

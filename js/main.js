@@ -320,6 +320,7 @@ function generateWorld() {
 		else{
 			inSafeArea = false;
 		}
+		hbCanvas.isSafe(inSafeArea);
 		
 		// block handles danger zones
 		if(hitObject = shadow.hit('enemy_range')){
@@ -354,6 +355,7 @@ function generateWorld() {
 					if(typeof obj.jumpScare === "undefined"){
 						obj.jumpScare = true;
 						console.log("jump scare!");
+						hbCanvas.scare();
 						PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT, PLAYER_CURRENT_HEALTH - ENEMY_JUMP_SCARE_LOSS);
 						hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
 						
@@ -370,6 +372,8 @@ function generateWorld() {
 			}
 		}
 
+		this.setSpeed(inEnemyRange, inAlley);
+
 		
 		this.syncCanvas(hbCanvas);
 	})
@@ -377,6 +381,24 @@ function generateWorld() {
 	player.syncCanvas = function(hbCanvas) {
 		hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 3 + Crafty.viewport.y)
 		hbCanvas.setHomeDirection(HOME_X * 50 - this._x, HOME_Y * 50 - this._y);
+	}
+
+	player.setSpeed = function(enemy, alley) {
+		var curspeed, speed;
+		curspeed = this._speed.x;
+		if (enemy) {
+			speed = 6;
+		} else if (alley) {
+			speed = 5;
+		} else {
+			speed = 4;
+		}
+		if (curspeed != speed) {
+			this._speed = {x: speed, y: speed};
+			this.speed(this._speed);
+			this._movement.x *= speed / curspeed;
+			this._movement.y *= speed / curspeed;
+		}
 	}
 
 	window.setTimeout(function() {
