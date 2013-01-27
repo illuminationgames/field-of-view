@@ -45,6 +45,7 @@ var PLAYER_LOSE_HEALTH_RATE_ALLEY = 3;
 var PLAYER_LOSE_HEALTH_DELAY = 500;
 var PLAYER_GAIN_HEALTH_RATE = 10;
 var PLAYER_GAIN_HEALTH_DELAY = 500;
+var ENEMY_JUMP_SCARE_LOSS = 50;
 
 // states
 var inEnemyRange = false;
@@ -156,7 +157,7 @@ Crafty.scene("main", function () {
 	// create the camera
 	Crafty.viewport.init(SCREEN_WIDTH, SCREEN_HEIGHT);
 	Crafty.viewport.clampToEntities = true;
-	//Crafty.viewport.mouselook(true);
+	Crafty.viewport.mouselook(true);
 	
 	generateWorld();
 	Crafty.viewport.follow(player, 1, 1);
@@ -200,87 +201,91 @@ function generateWorld() {
 		.attr({ x: PLAYER_START_X, y: PLAYER_START_Y + 87, z: 9 });
 	
 	player.bind("NewDirection",
-				function (direction) {
-						if(direction.x > 0)
-							this.flip('X');
-						else if(direction.x < 0)
-							this.unflip('X');
-				
-					if (direction.x != 0 || direction.y != 0) {
-						if(inEnemyRange || inAlley){
-							if (!this.isPlaying("huddled_walk"))
-								this.stop().animate("huddled_walk", 20, -1);
-						}
-						else{
-							if (!this.isPlaying("walk"))
-								this.stop().animate("walk", 20, -1);
-						}
-					}
-					/*if (direction.x > 0) {
-						if (!this.isPlaying("walk_right"))
-							this.stop().animate("walk_right", 10, -1);
-					}
-					if (direction.y < 0) {
-						if (!this.isPlaying("walk_up"))
-							this.stop().animate("walk_up", 10, -1);
-					}
-					if (direction.y > 0) {
-						if (!this.isPlaying("walk_down"))
-							this.stop().animate("walk_down", 10, -1);
-					}*/
-					else if(!direction.x && !direction.y) {
-						if(inEnemyRange || inAlley)
-							this.stop().animate("huddled", 20, -1);
-						else
-							this.stop().animate("stand", 20, -1);
-					}
-				});
-	
-	player.bind('Moved', function(from) {
-			// move the shadow with the player
-			shadow.x = player.x;
-			shadow.y = player.y + 87;
-	
-				// block handles objects the player can't just walk through
-				if(shadow.hit('clutter') || shadow.hit('no_walk') || shadow.hit('enemy')
-					|| this.x < 0 || shadow.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
-					this.attr({x: from.x, y:from.y});
-					shadow.attr({x: from.x, y:from.y + 87});
-				}
-				
-				// block handles safe spaces
-				if(player.hit('safe')){
-					if(!inSafeArea){
-						inSafeArea = true;
-						healthUpBySec(PLAYER_GAIN_HEALTH_RATE);
-					}
-				}
-				else{
-					inSafeArea = false;
-				}
-				
-				// block handles danger zones
-				if(player.hit('enemy_range')){
-					if(!inEnemyRange){
-						inEnemyRange = true;
-						healthDownBySec();
-					}
-					if (!this.isPlaying("huddled_walk"))
-						this.stop().animate("huddled_walk", 20, -1);
-				}
-				else if(player.hit('alley')){
-					if(!inAlley){
-						inAlley = true;
-						healthDownBySec();
-					}
+		function (direction) {
+				if(direction.x > 0)
+					this.flip('X');
+				else if(direction.x < 0)
+					this.unflip('X');
+		
+			if (direction.x != 0 || direction.y != 0) {
+				if(inEnemyRange || inAlley){
 					if (!this.isPlaying("huddled_walk"))
 						this.stop().animate("huddled_walk", 20, -1);
 				}
 				else{
-					inAlley = false;
-					inEnemyRange = false;
 					if (!this.isPlaying("walk"))
 						this.stop().animate("walk", 20, -1);
+				}
+			}
+			else if(!direction.x && !direction.y) {
+				if(inEnemyRange || inAlley)
+					this.stop().animate("huddled", 20, -1);
+				else
+					this.stop().animate("stand", 20, -1);
+			}
+		});
+	
+	player.bind('Moved', function(from) {
+		// move the shadow with the player
+		shadow.x = player.x;
+		shadow.y = player.y + 87;
+
+
+		// block handles objects the player can't just walk through
+		if(shadow.hit('clutter') || shadow.hit('no_walk') 
+			|| this.x < 0 || shadow.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
+			this.attr({x: from.x, y:from.y});
+			shadow.attr({x: from.x, y:from.y + 87});
+		}
+		
+		var hitObject = shadow.hit('safe');
+		// block handles safe spaces
+		if(hitObject){
+			if(!inSafeArea){
+				inSafeArea = true;
+				healthUpBySec(PLAYER_GAIN_HEALTH_RATE);
+			}
+		}
+		else{
+			inSafeArea = false;
+		}
+		
+		// block handles danger zones
+		if(hitObject = shadow.hit('enemy_range')){
+			if(!inEnemyRange){
+				inEnemyRange = true;
+				healthDownBySec();
+			}
+			if (!this.isPlaying("huddled_walk"))
+				this.stop().animate("huddled_walk", 20, -1);
+		}
+		else if(hitObject = player.hit('alley')){
+			if(!inAlley){
+				inAlley = true;
+				healthDownBySec();
+			}
+			if (!this.isPlaying("huddled_walk"))
+				this.stop().animate("huddled_walk", 20, -1);
+		}
+		else{
+			inAlley = false;
+			inEnemyRange = false;
+			if (!this.isPlaying("walk"))
+				this.stop().animate("walk", 20, -1);
+		}
+		
+		// block handles enemy jump scare
+		if(hitObject = shadow.hit('enemy')){
+			for(var ctr = 0; ctr < hitObject.length; ctr += 1){
+				var obj = hitObject[ctr].obj;
+				if(obj.has('enemy')){
+					// jump scare
+					if(typeof obj.jumpScare === "undefined"){
+						obj.jumpScare = true;
+						console.log("jump scare!");
+						PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT, PLAYER_CURRENT_HEALTH - ENEMY_JUMP_SCARE_LOSS);
+						hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
+					}
 				}
 				
 				// block handles getting home safely
@@ -291,6 +296,8 @@ function generateWorld() {
 				hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 2 + Crafty.viewport.y)
 				hbCanvas.setHomeDirection(HOME_X * 50 - this._x, HOME_Y * 50 - this._y);
 			})
+		}
+	})
 
 	window.hbCanvas = new HeartbeatCanvas();
 	hbCanvas.moveTo(player._x + player._w / 2 + Crafty.viewport.x, player._y + player._h / 2 + Crafty.viewport.y);
@@ -322,28 +329,6 @@ function generateMap(json){
 	MAP_HEIGHT = mapHeight * TILE_HEIGHT;
 	
 	var ctr = 0;
-	
-	/*
-	for(var row = 0; row < mapHeight; row += 1){
-		for(var col = 0; col < mapWidth; col += 1){
-			var tileNum = mapData[ctr];
-			if(tileNum == 0){
-				ctr += 1;
-				continue;
-			}
-			var rowCol = linToRowCol(tileNum - 1, TILEMAP_ACROSS, TILEMAP_DOWN);
-			var blockType = TILELABEL_LIST[rowCol[0]][rowCol[1]];
-			var minX = col * TILE_WIDTH;
-			var minY = row * TILE_HEIGHT;
-			
-			// create the new block
-			Crafty.e("2D, " + TILE_LIST[rowCol[0]][rowCol[1]] + ", " + TILELABEL_LIST[rowCol[0]][rowCol[1]])
-					.attr({x: minX, y: minY, z: 1});
-
-			ctr += 1;
-		}
-	}*/
-	
 	// initialize the safe, can't-walk-here, and enemy blocks
 	for(var row = 0; row < mapHeight; row += 1){
 		for(var col = 0; col < mapWidth; col += 1){
@@ -361,7 +346,6 @@ function generateMap(json){
 					attr({x: minX, y: minY, z: 1});
 			}
 			
-			
 			// place a no-walk barrier
 			tileNum = noWalkData[ctr];
 			if(tileNum != 0){
@@ -372,13 +356,14 @@ function generateMap(json){
 			// place an enemy
 			tileNum = enemyData[ctr];
 			if(tileNum == 102){
-				Crafty.e("2D, DOM, enemy")
+				var enemy = Crafty.e("2D, DOM, enemy")
 						.attr({x: minX, y: minY, z: 1});
+				
 				// create a "radius of enmity" around the enemy's center
 				var offsetX = minX - (ENEMY_EFFECT_RADIUS - TILE_WIDTH / 2);
 				var offsetY = minY - (ENEMY_EFFECT_RADIUS - TILE_HEIGHT / 2);
 				Crafty.e("2D, DOM, enemy_range")
-						.attr({x: offsetX, y: offsetY, z: 2});	
+						.attr({x: offsetX, y: offsetY, z: 2});
 			}
 			
 			ctr += 1;
