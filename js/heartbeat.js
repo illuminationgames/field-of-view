@@ -32,7 +32,7 @@ function HeartbeatCanvas() {
 	this.lastClone = -1;
 	this._homeDirection = 0;
 	this._soundsEnabled = false;
-	this._lastScare = false;
+	this._lastScare = null;
 
 	this._safe = false;
 	this._loadSounds();
@@ -127,11 +127,19 @@ $.extend(HeartbeatCanvas.prototype, {
 		}
 	},
 	scare: function() {
-		var which = this._lastScare;
-		while (which === this._lastScare) {
-			which = Math.floor(Math.random() * this.scareSounds.length);
+		var scare = this._lastScare;
+		while (scare === this._lastScare) {
+			var which = Math.floor(Math.random() * this.scareSounds.length);
+			scare = this._sounds[this.scareSounds[which]].play();
 		}
-		this._sounds[this.scareSounds[which]].play();
+		scare.play();
+	},
+	defend: function() {
+		if (this._lastScare) {
+			this._lastScare.stop();
+		}
+		// Make a self-defense sound eventually
+		this._sounds.clocktickhalf.play();
 	},
 	setVisibility: function(targetVis) {
 		if (this.pulse) {

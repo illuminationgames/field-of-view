@@ -47,6 +47,7 @@ var ENEMY_SCARE_RADIUS = 100;
 var ENEMY_EFFECT_RADIUS = 200;
 var ENEMY_DISTANCE_MULTIPLIER = .2;
 var SELF_DEFENSE_TIMEOUT = 3000;
+var SELF_DEFENSE_LENGTH = 500;
 
 var PLAYER_LOSE_HEALTH_RATE = 10;
 var PLAYER_LOSE_HEALTH_RATE_ALLEY = 3;
@@ -61,6 +62,7 @@ var inAlley = false;
 var inSafeArea = false;
 var scaringEnemy = null; // What enemy is currently scaring us?
 var scareTime = null; // When did the scare happen?
+var isDefending = false;
 
 // end state
 var WIN_OR_LOSE = 0;	// 1 for win, -1 for lose
@@ -262,6 +264,7 @@ function generateWorld() {
 		init: function() {
 		  this.requires('SpriteAnimation, Collision, Grid')
 			  .animate('stand', 0, 0, 0)
+				.animate('defend', 1 /* For now */, 0, 0)
 			  .animate('walk', 1, 0, 4)
 			  .animate('huddled', 5, 0, 5)
 			  .animate('huddled_walk', 6, 0, 9);
@@ -278,6 +281,8 @@ function generateWorld() {
 	
 	player.bind("NewDirection",
 		function (direction) {
+				if (isDefending)
+					return;
 				if(direction.x > 0)
 					this.flip('X');
 				else if(direction.x < 0)
@@ -302,6 +307,10 @@ function generateWorld() {
 		});
 	
 	player.bind('Moved', function(from) {
+		if (isDefending) {
+			this.attr({_x: from.x, _y:from.y});
+			return;
+		}
 		// move the shadow with the player
 		shadow.x = player._x;
 		shadow.y = player._y + SHADOW_OFFSET;
@@ -357,6 +366,7 @@ function generateWorld() {
 					// We have a new, scary enemy.  Do a jump scare and set scaring to true.
 					checkEnemy.isScaring = true;
 					scaringEnemy = checkEnemy;
+					scareTime = Date.now();
 
 					checkEnemy.canScare = false;
 
@@ -445,6 +455,28 @@ function generateWorld() {
 			this._movement.y *= speed / curspeed;
 		}
 	}
+
+	player.bind('KeyDown', 
+		function(e) {
+			if (e.key == Crafty.keys['SPACE'] && player._movement.x == 0 && player._movement.y == 0) {
+				console.log("Defending", scaringEnemy, scareTime, Date.now() - (scareTime || 0));
+				if (scaringEnemy && scareTime && Date.now() < scareTime + SELF_DEFENSE_TIMEOUT) {
+					hbCanvas.defend();
+					scaringEnemy.isScaring = false;
+					inEnemyRange = false;
+					player.setSpeed(inEnemyRange, inAlley);
+					playerGainHealth(ENEMY_JUMP_SCARE_LOSS / 2);
+					scaringEnemy = null;
+				}
+
+				player.stop().animate("defend", 20, -1);
+				isDefending = true;
+				window.setTimeout(function() {
+					isDefending = false;
+					player.trigger("NewDirection", player._movement);
+				}, SELF_DEFENSE_LENGTH);
+			}
+		});
 
 	window.setTimeout(function() {
 		player.syncCanvas(hbCanvas);
@@ -561,6 +593,14 @@ function playerLoseHealth(amount) {
 	return false;
 }
 
+/**
+Helper function increases player health by an amount
+*/
+function playerGainHealth(amount) {
+	PLAYER_CURRENT_HEALTH = Math.min(PLAYER_MAX_HEALTH, PLAYER_CURRENT_HEALTH + amount);
+	hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
+}
+
 
 /**
 Helper function sets player health down each second
@@ -589,8 +629,7 @@ Helper function sets player health gain each second
 function healthUpBySec(){
 	//console.log("Health up to " + PLAYER_CURRENT_HEALTH);
 	if(inSafeArea){
-		PLAYER_CURRENT_HEALTH = Math.min(PLAYER_MAX_HEALTH, PLAYER_CURRENT_HEALTH + PLAYER_GAIN_HEALTH_RATE);
-		hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
+		playerGainHealth(PLAYER_GAIN_HEALTH_RATE);
 	
 		frameDelay.delay(healthUpBySec, PLAYER_GAIN_HEALTH_DELAY);
 	}
