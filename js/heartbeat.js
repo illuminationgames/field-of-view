@@ -80,12 +80,13 @@ $.extend(HeartbeatCanvas.prototype, {
 		lowLag.load(["Heartbeat3.ogg","Heartbeat3.mp3"], 'Heartbeat3');
 
 		// Buzz is used for all the other sounds, because it allows play/stop/etc and we don't need multiple instances.
-		buzz.defaults.volume = 100;
+		var maxVolume = 20;
+		buzz.defaults.volume = maxVolume;
 		this._sounds = {};
 		$.each(this._soundFiles, function(_,name) {
-			self._sounds[name] = new buzz.sound("audio/"+name, {
+			self._sounds[name] = self.limitVolume(maxVolume, new buzz.sound("audio/"+name, {
 				formats: [ "ogg", "mp3" ]
-			});
+			}));
 		});
 		this._voices = [];
 		$.each(this._voiceFiles, function(name, counts) {
@@ -93,22 +94,51 @@ $.extend(HeartbeatCanvas.prototype, {
 			self._voices.push(curVoice);
 			for (var n = 1; n <= counts[0]; n++) {
 				curVoice.defenses.push(
-					new buzz.sound("voices/voice"+name+"_defense"+n, {
+					self.limitVolume(maxVolume, new buzz.sound("voices/voice"+name+"_defense"+n, {
 						formats: [ "ogg", "mp3" ]
-					})
+					}))
 				);
 			}
 			for (var n = 1; n <= counts[1]; n++) {
 				curVoice.attacks.push(
-					new buzz.sound("voices/voice"+name+"_attack"+n, {
+					self.limitVolume(maxVolume, new buzz.sound("voices/voice"+name+"_attack"+n, {
 						formats: [ "ogg", "mp3" ]
-					})
+					}))
 				);
 			}
 		});
 		buzz.all().load();
 		this._sounds.citynight.loop();
 		//this._sounds.serenity.loop();
+	},
+	limitVolume: function(volLimit, sound) {
+		//sound._origFadeTo = sound.fadeTo;
+		sound._origSetVolume = sound.setVolume;
+		sound._volumeLimit = volLimit / 100;
+		sound.setVolume = this._limitedSetVolume;
+		//sound.fadeTo = this._limitedFadeTo;
+		return sound;
+	},
+	_limitedSetVolume: function( volume ) {
+		if ( volume < 0 ) {
+			volume = 0;
+		}
+		if ( volume > 100 ) {
+			volume = 100;
+		}
+	
+		this.volume = volume;
+		this.sound.volume = volume * this._volumeLimit / 100;
+		return this;
+	},
+	_limitedFadeTo: function(to, duration, callback) {
+		if ( duration instanceof Function ) {
+				callback = duration;
+				duration = buzz.defaults.duration;
+		} else {
+				duration = duration || buzz.defaults.duration;
+		}
+		return this._origFadeTo(to * this._volumeLimit, duration, callback);
 	},
 	randomizeVoice: function() {
 		this._playerVoice = Math.floor(Math.random() * this._voices.length);
@@ -143,11 +173,11 @@ $.extend(HeartbeatCanvas.prototype, {
 		if (this._safe != safe) {
 			console.log("Setting safe:",safe);
 			if (safe) {
-				this._sounds.serenity.fadeIn(3000).play();
-				this._sounds.citynight.fadeTo(25,10000);
+				this._sounds.serenity.fadeIn(1000).play();
+				this._sounds.citynight.fadeTo(25,5000);
 				this._safe = safe;
 			} else {
-				this._sounds.citynight.fadeTo(100, 500);
+				this._sounds.citynight.fadeTo(100, 300);
 				this._safe = null;
 				if (this._sounds.serenity.isEnded()) {
 					this._sounds.serenity.stop();
