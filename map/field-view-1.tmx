@@ -9,6 +9,9 @@
  <tileset firstgid="101" name="placeholderspritesheet_npc" tilewidth="50" tileheight="50">
   <image source="placeholderspritesheet_npc.png" width="150" height="100"/>
  </tileset>
+ <tileset firstgid="107" name="good_guy" tilewidth="50" tileheight="50">
+  <image source="good_guy.png" width="50" height="100"/>
+ </tileset>
  <layer name="Walk Areas" width="64" height="48">
   <data encoding="base64" compression="zlib">
    eJztmtsOgyAMhtnudtJtd176/i85zSQhhkMpLQP3/0mvgNJvM7RUjQnrsdjtwDZE2FddFzsf2C4E/pP5Pgd3jw2J8VbNxk3lt/Pmne3Hc3zF9N5sIsw127ycNdRYwA9+af6nkT+3e+GXOLN9+/XAv/7vWue2y/8KWIwrJHfe5LEc/pD2v+lMjMfVGkuI28dPlbufz2dL/CnjqBd+LdV4/rnxtLCfRDxSd6zUXYajGvzWh3ROlFBNfu4dinqXKYmtBj/Xh+aZAH7w5/L78rlmTuesd+vlEt/g758/VlOMJn5nT41TrNSHXc/l/3UPtlYvN8RPqS1Ka5OS/jDVx8jkj6mF3KSR3/6dn9v/0tpH2wfXJ/jBD37wg5/WY9boj7bCn3q/oNUfB38b/Jr7aPvg+gQ/+MEPfvD7lepxluZPag7V6rmCX46fUz9Ta2ht/pq9aekYSuJq4d28RAzcnrnEN2u5vWmtGEJxfQDXcTbV
@@ -21,7 +24,7 @@
  </layer>
  <layer name="Bad" width="64" height="48">
   <data encoding="base64" compression="zlib">
-   eJzt1zEKACAIBVBPG3T/CzQ0V1RDYO+t4iIo/oixMqn9oF70mh0AAOzzR8NbdhCgcw8BgBX/AgAAAC+d5NJMWfYkl8qyZNIAzjIGeQ==
+   eJzt11EKgCAQBUBPG0Td/7sTKKG1LjrzKyIIuu+VUnc01nZwDuyNuLsr4IxeI3f31h1wBgB1medQBHMI/qGDwFze4JpWyC2yJ9H8h0Txv8Ec3h5fkBcAgF3IzwA59fTSlbpsTy/VZfOQL8Y9hJwMxg==
   </data>
  </layer>
  <objectgroup name="Object Layer 1" width="64" height="48" visible="0">
