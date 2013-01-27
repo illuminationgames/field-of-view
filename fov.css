@@ -73,6 +73,7 @@ body {
 	z-index: 10;
 }
 
+
 .invisible{
 	display: none;
 }
@@ -157,7 +158,7 @@ a:active {
 	text-align: center;
 	padding:20px;
 	color:#323131;
-	margin: 0 20px 0 20px;
+	margin: 0 20px 20px 20px;
 }
         
 
