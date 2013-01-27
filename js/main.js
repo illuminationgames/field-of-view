@@ -41,7 +41,7 @@ var ENEMY_EFFECT_RADIUS = 100;
 var ENEMY_DISTANCE_MULTIPLIER = .2;
 
 var PLAYER_LOSE_HEALTH_RATE = 10;
-var PLAYER_LOSE_HEALTH_RATE_ALLEY = 5;
+var PLAYER_LOSE_HEALTH_RATE_ALLEY = 3;
 var PLAYER_LOSE_HEALTH_DELAY = 500;
 var PLAYER_GAIN_HEALTH_RATE = 10;
 var PLAYER_GAIN_HEALTH_DELAY = 500;
@@ -155,7 +155,7 @@ Crafty.scene("main", function () {
 	
 	// create the camera
 	Crafty.viewport.init(SCREEN_WIDTH, SCREEN_HEIGHT);
-	Crafty.viewport.clampToEntities = false;
+	Crafty.viewport.clampToEntities = true;
 	//Crafty.viewport.mouselook(true);
 	
 	generateWorld();
@@ -201,6 +201,11 @@ function generateWorld() {
 	
 	player.bind("NewDirection",
 				function (direction) {
+						if(direction.x > 0)
+							this.flip('X');
+						else if(direction.x < 0)
+							this.unflip('X');
+				
 					if (direction.x != 0 || direction.y != 0) {
 						if(inEnemyRange || inAlley){
 							if (!this.isPlaying("huddled_walk"))
@@ -237,7 +242,8 @@ function generateWorld() {
 			shadow.y = player.y + 87;
 	
 				// block handles objects the player can't just walk through
-				if(shadow.hit('clutter') || shadow.hit('no_walk') || this.x < 0 || shadow.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
+				if(shadow.hit('clutter') || shadow.hit('no_walk') || shadow.hit('enemy')
+					|| this.x < 0 || shadow.y < 0 || this.x > MAP_WIDTH - PLAYER_WIDTH || this.y > MAP_HEIGHT - PLAYER_HEIGHT){
 					this.attr({x: from.x, y:from.y});
 					shadow.attr({x: from.x, y:from.y + 87});
 				}
@@ -258,19 +264,20 @@ function generateWorld() {
 					if(!inEnemyRange){
 						inEnemyRange = true;
 						healthDownBySec();
-						if (!this.isPlaying("huddled_walk"))
-							this.stop().animate("huddled_walk", 20, -1);
 					}
+					if (!this.isPlaying("huddled_walk"))
+						this.stop().animate("huddled_walk", 20, -1);
 				}
 				else if(player.hit('alley')){
 					if(!inAlley){
 						inAlley = true;
 						healthDownBySec();
-						if (!this.isPlaying("huddled_walk"))
-							this.stop().animate("huddled_walk", 20, -1);
 					}
+					if (!this.isPlaying("huddled_walk"))
+						this.stop().animate("huddled_walk", 20, -1);
 				}
 				else{
+					inAlley = false;
 					inEnemyRange = false;
 					if (!this.isPlaying("walk"))
 						this.stop().animate("walk", 20, -1);
@@ -365,7 +372,8 @@ function generateMap(json){
 			// place an enemy
 			tileNum = enemyData[ctr];
 			if(tileNum == 102){
-				
+				Crafty.e("2D, DOM, enemy")
+						.attr({x: minX, y: minY, z: 1});
 				// create a "radius of enmity" around the enemy's center
 				var offsetX = minX - (ENEMY_EFFECT_RADIUS - TILE_WIDTH / 2);
 				var offsetY = minY - (ENEMY_EFFECT_RADIUS - TILE_HEIGHT / 2);
