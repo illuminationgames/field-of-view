@@ -62,8 +62,8 @@ $.extend(HeartbeatCanvas.prototype, {
 	],
 	// Voice: [defenses, attacks]
 	_voiceFiles: {
-		1: [2, 3],
-		2: [2, 3]
+		1: [2, 0],
+		2: [0, 3]
 	},
 	scareSounds: [
 		'whistle1',
@@ -141,7 +141,9 @@ $.extend(HeartbeatCanvas.prototype, {
 		return this._origFadeTo(to * this._volumeLimit, duration, callback);
 	},
 	randomizeVoice: function() {
-		this._playerVoice = Math.floor(Math.random() * this._voices.length);
+		do {
+			this._playerVoice = Math.floor(Math.random() * this._voices.length);
+		} while (this._voices[this._playerVoice].defenses.length == 0);
 	},
 	moveTo: function(x, y) {
 		//console.log('hb-moveto',x,y);
@@ -193,6 +195,7 @@ $.extend(HeartbeatCanvas.prototype, {
 		while (scare === this._lastScare) {
 			var voice = Math.floor(Math.random() * this._voices.length);
 			if (voice == this._playerVoice) continue;
+			if (this._voices[voice].attacks.length == 0) continue;
 			var which = Math.floor(Math.random() * this._voices[voice].attacks.length);
 			scare = this._voices[voice].attacks[which];
 		}
