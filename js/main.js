@@ -30,7 +30,8 @@ var FRAME_DELAY = 20;
 
 var DOM_OR_CANVAS = "DOM";
 
-var BG_MAP_SRC = "art/field-view-1.png";
+var BG_MAP_SRC = "art/CITY_final.png";
+var BG_FLOAT_SRC = "art/CITY_FLOAT_final.png";
 var PLAYER_SRC = "art/avespritesheet.png";
 var SHADOW_SRC = "art/placeholder_shadow.png";
 var ENEMY_SRC = "art/placeholderspritesheet_npc.png";
@@ -77,6 +78,7 @@ var frameParser;
 var frame_count = 0;
 
 var doonce = 0;
+var seenInstructions = false;
 
 /**
 Build our sprites below
@@ -85,6 +87,10 @@ Build our sprites below
 
 Crafty.sprite(1, BG_MAP_SRC, {
 	map: [0, 0, MAP_WIDTH, MAP_HEIGHT]
+});
+
+Crafty.sprite(1, BG_FLOAT_SRC, {
+	map_float: [0, 0, MAP_WIDTH, MAP_HEIGHT]
 });
 
 Crafty.sprite(PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SRC, {
@@ -141,14 +147,24 @@ var TILELABEL_LIST = new Array(new Array("street", "street"),
 The function called to begin Crafty
 */
 window.onload = function () {
-    //start crafty
-    Crafty.init(MAP_WIDTH, MAP_HEIGHT);	// currently using DOM
-	
-	// Load heartbeat overlay
-	window.hbCanvas = new HeartbeatCanvas();
-	
-	//automatically play the loading scene
-	Crafty.scene("loading");
+	var gamePos = $('#cr-stage').position();
+	//$('#cr-instructions').css({'display': 'block'});
+	$('#cr-instructions').css({top: gamePos.top, left: gamePos.left});
+
+	$('#cr-instructions').on('click', function() {
+		if(!seenInstructions){
+			$('#cr-instructions').css({display: 'none'});
+			seenInstructions = true;
+			//start crafty
+			Crafty.init(MAP_WIDTH, MAP_HEIGHT);	// currently using DOM
+			
+			// Load heartbeat overlay
+			window.hbCanvas = new HeartbeatCanvas();
+			
+			//automatically play the loading scene
+			Crafty.scene("loading");
+		}
+	});
 };
 
 
@@ -158,7 +174,7 @@ the loading screen that will display while our assets load
 Crafty.scene("loading", function () {
 	console.log("in loading");
     //load takes an array of assets and a callback when complete, runs the main scene
-    Crafty.load([BG_MAP_SRC, PLAYER_SRC, ENEMY_SRC, TILEMAP_SRC, SHADOW_SRC, ENEMYRANGE_SRC], function () {
+    Crafty.load([BG_MAP_SRC, BG_FLOAT_SRC, PLAYER_SRC, ENEMY_SRC, TILEMAP_SRC, SHADOW_SRC, ENEMYRANGE_SRC], function () {
         Crafty.scene("main"); 
     });
 
@@ -220,9 +236,12 @@ Crafty.scene("end", function () {
 	}
 });
 
-//method to generate the map
+/**
+Method generates a background map, a player character, a shadow (for collision), and an overlay layer.
+*/
 function generateWorld() {
-	Crafty.e("2D, " + DOM_OR_CANVAS + ", map").attr({x: 0, y: 0, z: 1});
+	Crafty.e("2D, DOM, map").attr({x: 0, y: 0, z: 1});
+	Crafty.e("2D, DOM, map_float").attr({x:0, y:0, z:15});
 	
 	Crafty.c("playerControls", {
 		init: function() {
@@ -300,8 +319,6 @@ function generateWorld() {
 			shadow.attr({x: from.x, y:from.y + SHADOW_OFFSET});
 			footprint.attr({x: from.x + FOOTPRINT_OFFSETX, y:from.y + FOOTPRINT_OFFSETY});
 		}
-
-		
 						
 		// block handles getting home safely
 		if(player.hit('home')){
@@ -326,10 +343,8 @@ function generateWorld() {
 		}
 		hbCanvas.isSafe(inSafeArea);
 
-
 		var footprintX = footprint._x + FOOTPRINT_WIDTH / 2;
 		var footprintY = footprint._y + FOOTPRINT_HEIGHT / 2;
-
 
 		// Check to see if we're being threatened by a new enemy, first
 		if(hitObject = footprint.hit('enemy_range')){
