@@ -47,6 +47,7 @@ $.extend(HeartbeatCanvas.prototype, {
 		'citynight',
 		'serenity',
 
+		/*
 		// Time
 		'clocktickhalf',
 		'midnight',
@@ -59,17 +60,13 @@ $.extend(HeartbeatCanvas.prototype, {
 		'carthrough',
 		'darkvoices',
 		'evildriver'
+		*/
 	],
 	// Voice: [defenses, attacks]
 	_voiceFiles: {
-		1: [2, 0],
-		2: [0, 3]
+		1: [9, 9],
+		2: [0, 9]
 	},
-	scareSounds: [
-		'whistle1',
-		'whistle2',
-		'whistle3'
-	],
 	_loadSounds: function() {
 		var self = this;
 
