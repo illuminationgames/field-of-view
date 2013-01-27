@@ -52,6 +52,7 @@ var IS_ENEMY_PERCENT = .3;
 var SELF_DEFENSE_TIMEOUT = 3000;
 var SELF_DEFENSE_LENGTH = 500;
 var DEFENSE_SUCCESS_RATE = .75;
+var FIRST_DEFENSE = true;
 
 var PLAYER_LOSE_HEALTH_RATE = 10;
 var PLAYER_LOSE_HEALTH_RATE_ALLEY = 3;
@@ -460,9 +461,10 @@ function generateWorld() {
 			if (e.key == Crafty.keys['SPACE'] && player._movement.x == 0 && player._movement.y == 0) {
 				console.log("Defending", scaringEnemy, scareTime, Date.now() - (scareTime || 0));
 				if (scaringEnemy && scareTime && Date.now() < scareTime + SELF_DEFENSE_TIMEOUT) {
-					var defenseSuccessful = (Math.random() < DEFENSE_SUCCESS_RATE);
+					var defenseSuccessful = (FIRST_DEFENSE || Math.random() < DEFENSE_SUCCESS_RATE);
 					hbCanvas.defend(defenseSuccessful);
 					if (defenseSuccessful) {
+						FIRST_DEFENSE = false;
 						scaringEnemy.isScaring = false;
 						scaringEnemy.stop().animate("stand_normal", 500, -1);
 						inEnemyRange = false;
