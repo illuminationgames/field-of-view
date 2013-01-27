@@ -14,12 +14,12 @@
  </tileset>
  <layer name="Walk Areas" width="64" height="48">
   <data encoding="base64" compression="zlib">
-   eJztmt0OgyAMhdnu9qfb7rz0/V9ymkliDIVSWobunKRXQOm3GUqrztF6THY7sHUR9lnXyc4HtguD/+S+z8E9YF1ivFXzcXP5/bxxY9vxHF8xvRcbGHPdMi9nDTcW8INfm//p9M/tvfBrnNmh/fbAP//vVuf2mv9FWIyL0nreELAcfkrb33RkxrPWHAvFHeLnar1fyGdL/CmTaC/8Vqrx/EvjaWE/jXi0aqxULSNRDX7vQzsnaqgmv7SG4tYyJbHV4Jf6sDwTwA/+XP5QPrfM6ZL13FoB/Mfnj90pehev2VPjHCv14ddL+X/dg63Vy6X4OXeL0rtJSX+Y66MX8sfUQm6yyG//zi/tf1ntY+1D6hP84Ac/+MHP6zFb9Edb4U+9X7Dqj4O/DX7Lfax9SH2CH/zgBz/4acV6nKX5k5tDrXqu4Nfjl9yfuXdoa/6avWntGEriauHdvEYM0p65xjdrub1pqxiouD79/zZy
+   eJztmt0OgyAMhdnu9qfb7rz0/V9ymklCDC2ltAxZT9IrsfTbDJSjzsF6LHHrOAaEfdV1iXPHcSHwn9z3ObhHYkhcbzV83VR+P27exf56Ti5M7y0mwli3jcu5h1qL8Ru/NP/Tya/bR+GXWLNj8x2Bf/3ftdbtkP8FBMYFKRw3RSKHH9L+N52J9YRaa4G4Y/xUhfPFcrbEnwqOjsKvpRrPP7eeFuaTqEfqjJU6y3BUg9/nkN4TJVSTn3uGop5lSmqrwc/NobkmGL/x5/LH9nPNPZ1zP/WsYPz982M9xejwM3vqOiVKc/j7ufy/9mBrebkQP6W3KO1NSvxhao6RyY+phb1JY3/7d36u/6U1j3YObk7jN37jN35sHOYt98Sf8te1/GHjb4Of8o5Bwx9vhV9zHu0c3JzGb/zGb/zGDwvzOEv7B2oPoeW5Gr8cP6d/ovZQ2vw1vWnpGkrqauHdvEQNXM9c4pu1XG9aqwaorg85zjaD
   </data>
  </layer>
  <layer name="No Walk/ Home" width="64" height="48">
   <data encoding="base64" compression="zlib">
-   eJztll0Og0AIhD1Ln3r/E/axiV1ghj/dyiSm2QoDX9xFj2Ot10MuSdq9J2j49fUqHt1nmbGrvrx7/uyhra14r1dG3YxzXc2f8fylunfnz9Dwy97sftH8pbUVz+R65OGJzL9IPDuL0bnA9PkWLq1nRp5nrPFb/w3/9xe57srPXEiuVCfKj55HRtlzsZqfWSMa/lztzs/OA7SHnfgr8rv4mWeFeFq6Iz/qh3haYvitdyTrvRO/leP93ljd1+p6v2mi84+N2VXDnxMj5UX2Zoe6zz97Njs8WH40rmM2V3hYnlW1hz+Wn+VheVbVHv5YfpaH5VlV+x/5q79NkR6i8vJ31dVyhr+vj+H/XT/5/M/8j9UZfl7DH/ewPCO1tZmXMT+9PUj5ksdKaG1pnf3+RHuIxGtxw4/tT23vRYXucW/8OTdTGee/UxX8V/dwZe278n8AUH1chQ==
+   eJztlksOwjAMRHsWVtz/hCyRSvwZe5wmxCNVKGCP/Wji9rrGeh1ySdJ+O0HNr69H8d59xowd9RXd83cPbW3FR70YdRnnupqfcf+luqvzM9T8sje6XzR/aW3FI7kRRXgy8y8Tj85i71xA+nwLl9Yzosg91vit75r/++m5VuVHLk+uVCfL7z2PiNhzsZofWXvU/Fztzo/OA28PO/FX5M/iR+6Vx9PSivxeP4+nJYTfekai3jvxWznR943R71rd6DtNdv6hMbuq+TkxUl5mb85Q9fnP9BL5/xjPWKsvpH9E2XyWh+VZVbv5c/ksD8uzqnbz5/JZHpZnVe1/5K9+N/X0kFWUf1ZdLaf55/XR/L/rk89/z/9cnebH1fx5D8szU1ubeYz5Ge1Bypc8RvLWltbs56e3h0y8Ftf8vv2p7b2svHs8Gn/PZYpx/meqgv/pHp6svSr/BxIOWw8=
   </data>
  </layer>
  <layer name="Bad" width="64" height="48">
