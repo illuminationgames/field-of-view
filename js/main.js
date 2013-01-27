@@ -196,52 +196,27 @@ The initialization function for the game over scene
 */
 Crafty.scene("end", function () {
 	console.log("Game ended");
-    // Crafty.background("#000");
 	
 	// did we win or lose?
 	if(WIN_OR_LOSE == -1){
 		// lost
 		console.log("Game lost");
-		var xStart = (SCREEN_WIDTH / 2) - 100;
-		var yStart = (SCREEN_HEIGHT / 2) - 40;
-		console.log("xStart: " + xStart + ", yStart: " + yStart);
+		var gamePos = $('#cr-stage').position();
+		$('#cr-lose').css({'display': 'block'});
+		console.log("Game top: " + gamePos.top + ", left: " + gamePos.left);
+		$('#cr-lose').css({'top': gamePos.top, 'left': gamePos.left});
 		
-		Crafty.e("2D, DOM, Text").attr({ w: 200, h: 20, x: xStart, y: yStart, z: 2 })
-			.text("You black out.")
-			.css({ "text-align": "center" })
-			.css({ "color": "white"  })
-			.css({ "font-size": "14px" });
-		
-		Crafty.e("2D, DOM, Text").attr({ w: 200, h: 20, x: xStart, y: yStart + 30, z: 2 })
-			.text("When you come to, you're on your front doorstep, with no memory of how you finally got there. But you were very lucky. This time.")
-			.css({ "text-align": "center" })
-			.css({ "color": "white"  })
-			.css({ "font-size": "14px" });
-		
-		var keyboard = Crafty.e("2D, DOM, Text").attr({w: 200, h:20, x: xStart, y: yStart + 60, z: 2})
-			.text("Press ENTER to go back to the main menu.")
-			.css({"text-align": "center" })
-			.css({ "color": "white"  })
-			.css({ "font-size": "14px" });
-		
-		keyboard.bind('KeyDown', 
-			function(e) {
-				if (e.key == Crafty.keys['ENTER']) {
-					console.log("Hit enter"); 
-					
-					// end crafty 
-					Crafty.stop(true);
-					
-					// redirect
-					window.location = "epilogue.html";
-				}
-			});
-			
-		console.log("Bound");
+		Crafty.stop();
 	}
 	else{
 		// won
-		Crafty.background("#fff");
+		console.log("Game won");
+		var gamePos = $('#cr-stage').position();
+		$('#cr-win').css({'display': 'block'});
+		console.log("Game top: " + gamePos.top + ", left: " + gamePos.left);
+		$('#cr-win').css({'top': gamePos.top, 'left': gamePos.left});
+		
+		Crafty.stop();
 	}
 });
 
@@ -512,7 +487,7 @@ function generateMap(json){
 			var minX = col * TILE_WIDTH;
 			var minY = row * TILE_HEIGHT;
 			
-			// place a safe zone or an alley
+			// place a safe zone, an alley, or a no-walk (dumpster)
 			var tileNum = groundData[ctr]
 			if(tileNum == 33){
 				Crafty.e("2D, safe").
@@ -521,6 +496,10 @@ function generateMap(json){
 			else if(tileNum == 17 || tileNum == 18){
 				Crafty.e("2D, alley").
 					attr({x: minX, y: minY, z: 1});
+			}
+			else if(tileNum == 25){
+				Crafty.e("2D, no_walk")
+					.attr({x: minX, y: minY, z: 1});
 			}
 			
 			// place a no-walk barrier or home
