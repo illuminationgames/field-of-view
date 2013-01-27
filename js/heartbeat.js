@@ -33,9 +33,12 @@ function HeartbeatCanvas() {
 	this._homeDirection = 0;
 	this._soundsEnabled = false;
 	this._lastScare = null;
+	this._playerVoice = null;
+	this._lastDefense = null;
 
 	this._safe = false;
 	this._loadSounds();
+	this.randomizeVoice();
 }
 
 $.extend(HeartbeatCanvas.prototype, {
@@ -57,6 +60,11 @@ $.extend(HeartbeatCanvas.prototype, {
 		'darkvoices',
 		'evildriver'
 	],
+	// Voice: [defenses, attacks]
+	_voiceFiles: {
+		1: [2, 3],
+		2: [2, 3]
+	},
 	scareSounds: [
 		'whistle1',
 		'whistle2',
@@ -67,9 +75,9 @@ $.extend(HeartbeatCanvas.prototype, {
 
 		// (A custom verion of) lowLag is used for the heartbeats, because they have to be as instant as possible.
 		lowLag.init({'urlPrefix':'audio/','debug':'none'});
-		lowLag.load(["Heartbeat1.ogg"], 'Heartbeat1');
-		lowLag.load(["Heartbeat2.ogg"], 'Heartbeat2');
-		lowLag.load(["Heartbeat3.ogg"], 'Heartbeat3');
+		lowLag.load(["Heartbeat1.ogg","Heartbeat1.mp3"], 'Heartbeat1');
+		lowLag.load(["Heartbeat2.ogg","Heartbeat2.mp3"], 'Heartbeat2');
+		lowLag.load(["Heartbeat3.ogg","Heartbeat3.mp3"], 'Heartbeat3');
 
 		// Buzz is used for all the other sounds, because it allows play/stop/etc and we don't need multiple instances.
 		buzz.defaults.volume = 100;
@@ -79,9 +87,31 @@ $.extend(HeartbeatCanvas.prototype, {
 				formats: [ "ogg", "mp3" ]
 			});
 		});
+		this._voices = [];
+		$.each(this._voiceFiles, function(name, counts) {
+			var curVoice = {defenses: [], attacks: []};
+			self._voices.push(curVoice);
+			for (var n = 0; n < counts[0]; n++) {
+				curVoice.defenses.push(
+					new buzz.sound("voices/voice"+name+"_defense"+n, {
+						formats: [ "ogg", "mp3" ]
+					})
+				);
+			}
+			for (var n = 0; n < counts[1]; n++) {
+				curVoice.attacks.push(
+					new buzz.sound("voices/voice"+name+"_attack"+n, {
+						formats: [ "ogg", "mp3" ]
+					})
+				);
+			}
+		});
 		buzz.all().load();
 		this._sounds.citynight.loop();
 		//this._sounds.serenity.loop();
+	},
+	randomizeVoice: function() {
+		this._playerVoice = Math.floor(Math.random() * this._voices.length);
 	},
 	moveTo: function(x, y) {
 		//console.log('hb-moveto',x,y);
@@ -100,7 +130,9 @@ $.extend(HeartbeatCanvas.prototype, {
 		this._sounds.citynight.play().fadeIn(500);
 	},
 	disableSounds: function() {
-		buzz.all().stop();
+		this._sounds.citynight.stop();
+		this._sounds.serenity.stop();
+		//buzz.all().stop();
 	},
 	isSafe: function(safe) {
 		var self = this;
@@ -129,17 +161,26 @@ $.extend(HeartbeatCanvas.prototype, {
 	scare: function() {
 		var scare = this._lastScare;
 		while (scare === this._lastScare) {
-			var which = Math.floor(Math.random() * this.scareSounds.length);
-			scare = this._sounds[this.scareSounds[which]].play();
+			var voice = Math.floor(Math.random() * this._voices.length);
+			if (voice == this._playerVoice) continue;
+			var which = Math.floor(Math.random() * this._voices[voice].attacks.length);
+			scare = this._voices[voice].attacks[which];
 		}
+		this._lastScare = scare;
 		scare.play();
 	},
 	defend: function() {
 		if (this._lastScare) {
 			this._lastScare.stop();
 		}
+		var defense = this._lastDefense;
+		while (defense === this._lastDefense) {
+			var which = Math.floor(Math.random() * this._voices[this._playerVoice].defenses.length);
+			defense = this._voices[this._playerVoice].defenses[which];
+		}
+		this._lastDefense = defense;
 		// Make a self-defense sound eventually
-		this._sounds.clocktickhalf.play();
+		defense.play();
 	},
 	setVisibility: function(targetVis) {
 		if (this.pulse) {
