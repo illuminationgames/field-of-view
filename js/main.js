@@ -36,7 +36,7 @@ var MAP_SRC = "map/field-view-map1.json";
 // damage variables
 var PLAYER_MAX_HEALTH = 250;
 var PLAYER_CURRENT_HEALTH = 250;
-var PLAYER_LOSE_LIMIT = 49;
+var PLAYER_LOSE_LIMIT = 50;
 var ENEMY_EFFECT_RADIUS = 100;
 var ENEMY_DISTANCE_MULTIPLIER = .2;
 
@@ -51,6 +51,9 @@ var ENEMY_JUMP_SCARE_LOSS = 50;
 var inEnemyRange = false;
 var inAlley = false;
 var inSafeArea = false;
+
+// end state
+var WIN_OR_LOSE = 0;	// 1 for win, -1 for lose
 
 // globals
 var player;
@@ -145,7 +148,7 @@ Crafty.scene("loading", function () {
 
     //black background with some loading text
     Crafty.background("#000");
-    Crafty.e("2D, DOM, Text").attr({ w: 100, h: 20, x: 150, y: 120 })
+    Crafty.e("2D, DOM, Text").attr({ w: 100, h: 20, x: SCREEN_WIDTH / 2 - 50, y: SCREEN_HEIGHT / 2 - 10 })
             .text("Loading")
             .css({ "text-align": "center" });
 });
@@ -170,6 +173,60 @@ Crafty.scene("main", function () {
 	// load the JSON map file and call generateMap when it does
 	$.getJSON(MAP_SRC, generateMap);
 	
+});
+
+/**
+The initialization function for the game over scene
+*/
+Crafty.scene("end", function () {
+	console.log("Game ended");
+    // Crafty.background("#000");
+	
+	// did we win or lose?
+	if(WIN_OR_LOSE == -1){
+		// lost
+		console.log("Game lost");
+		var xStart = (SCREEN_WIDTH / 2) - 100;
+		var yStart = (SCREEN_HEIGHT / 2) - 40;
+		console.log("xStart: " + xStart + ", yStart: " + yStart);
+		
+		Crafty.e("2D, DOM, Text").attr({ w: 200, h: 20, x: xStart, y: yStart, z: 2 })
+			.text("You black out.")
+			.css({ "text-align": "center" })
+			.css({ "color": "white"  })
+			.css({ "font-size": "14px" });
+		
+		Crafty.e("2D, DOM, Text").attr({ w: 200, h: 20, x: xStart, y: yStart + 30, z: 2 })
+			.text("When you come to, you're on your front doorstep, with no memory of how you finally got there. But you were very lucky. This time.")
+			.css({ "text-align": "center" })
+			.css({ "color": "white"  })
+			.css({ "font-size": "14px" });
+		
+		var keyboard = Crafty.e("2D, DOM, Text").attr({w: 200, h:20, x: xStart, y: yStart + 60, z: 2})
+			.text("Press ENTER to go back to the main menu.")
+			.css({"text-align": "center" })
+			.css({ "color": "white"  })
+			.css({ "font-size": "14px" });
+		/*
+		keyboard.bind('KeyDown', 
+			function(e) {
+				if (e.key == Crafty.keys['ENTER']) {
+					console.log("Hit enter"); 
+					
+					// end crafty 
+					Crafty.stop(true);
+					
+					// redirect
+					window.location = "epilogue.html";
+				}
+			});*/
+			
+		console.log("Bound");
+	}
+	else{
+		// won
+		
+	}
 });
 
 //method to generate the map
@@ -241,6 +298,17 @@ function generateWorld() {
 			shadow.attr({x: from.x, y:from.y + 87});
 		}
 		
+						
+		// block handles getting home safely
+		if(player.hit('home')){
+			//
+			if(WIN_OR_LOSE != 1){
+				WIN_OR_LOSE = 1;
+				hbCanvas.setVisibility(0);
+				Crafty.scene("end");
+			}
+		}
+		
 		var hitObject = shadow.hit('safe');
 		// block handles safe spaces
 		if(hitObject){
@@ -288,15 +356,20 @@ function generateWorld() {
 						console.log("jump scare!");
 						PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT, PLAYER_CURRENT_HEALTH - ENEMY_JUMP_SCARE_LOSS);
 						hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
+						
+						if(PLAYER_CURRENT_HEALTH == PLAYER_LOSE_LIMIT){
+							// lose
+							WIN_OR_LOSE = -1;
+							inEnemyRange = false;
+							inAlley = false;
+							hbCanvas.setVisibility(0);
+							Crafty.scene("end");
+						}
 					}
 				}
 			}
 		}
-				
-		// block handles getting home safely
-		if(player.hit('home')){
-			
-		}
+
 		
 		this.syncCanvas(hbCanvas);
 	})
@@ -351,11 +424,15 @@ function generateMap(json){
 					attr({x: minX, y: minY, z: 1});
 			}
 			
-			// place a no-walk barrier
+			// place a no-walk barrier or home
 			tileNum = noWalkData[ctr];
-			if(tileNum != 0){
+			if(tileNum == 34){
 				Crafty.e("2D, no_walk")
 					.attr({x: minX, y: minY, z: 1});
+			}
+			else if(tileNum == 40){
+				Crafty.e("2D, home")
+					.attr({x: minX, y:minY, z: 1});
 			}
 			
 			// place an enemy
@@ -391,6 +468,16 @@ Helper function sets player health down each second
 */
 function healthDownBySec(){
 	//console.log("Health down to " + PLAYER_CURRENT_HEALTH);
+	
+	if(PLAYER_CURRENT_HEALTH == PLAYER_LOSE_LIMIT){
+		// lose
+		inEnemyRange = false;
+		inAlley = false;
+		hbCanvas.setVisibility(0);
+		WIN_OR_LOSE = -1;
+		Crafty.scene("end");
+	}
+
 	if(inEnemyRange){
 		PLAYER_CURRENT_HEALTH = Math.max(PLAYER_LOSE_LIMIT, PLAYER_CURRENT_HEALTH - PLAYER_LOSE_HEALTH_RATE);
 		hbCanvas.setVisibility(PLAYER_CURRENT_HEALTH);
@@ -404,6 +491,7 @@ function healthDownBySec(){
 	else{
 		return;
 	}
+
 }
 
 /**

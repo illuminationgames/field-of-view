@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="64" height="48" tilewidth="50" tileheight="50">
+ <tileset firstgid="1" name="placeholder_streettiles-2" tilewidth="50" tileheight="50">
+  <image source="placeholder_streettiles-2.png" width="400" height="250"/>
+ </tileset>
+ <tileset firstgid="41" name="placeholder_home" tilewidth="50" tileheight="50">
+  <image source="placeholder_home.png" width="300" height="500"/>
+ </tileset>
+ <tileset firstgid="101" name="placeholderspritesheet_npc" tilewidth="50" tileheight="50">
+  <image source="placeholderspritesheet_npc.png" width="150" height="100"/>
+ </tileset>
+ <layer name="Walk Areas" width="64" height="48">
+  <data encoding="base64" compression="zlib">
+   eJztmt0OwiAMhdE7/zb1zsu9/0s64paQBWhXWsbmadIrWHs+NbR0Ope2x+i3A3uXYfd2Hf18YL8w+E/u9zu4R7wj1lv1WTeXP7WPWpfufU/+Yex10741z3C1xPYNgYMf/Gv5n07/3N4Lv8aZHctXk18Sx5v/3q3O7ZD/lXCJbk3+nA0LX6vH86e4Y/xcC/PFYrbET7nE9sJvZWG+2Ge6pZ4W8mno0bpjUXcZidXgn2No10QNq8kvvUNx7zIl2mrwS2NYngngB7+En1vPOTlKNcYs7JdLYoN///y5nqJ3+Ts7tc7x0hjz81L+rWewtWa5KX5Ob1Ham5TMh7kxeiF/zlqoTRb17d/5teY/WnmsY0hjgh/84Ac/+HkzZov5aCv81PsFq/k4+Nvgt8xjHUMaE/zgBz/4wR83as5ZWj+5NXSpg5q7gr8+v6R/5vbQ1vw1Z9PaGkp0tfBuXkODdGau8Z+1tbNpKw0pXV+GNTOj
+  </data>
+ </layer>
+ <layer name="No Walk/ Home" width="64" height="48" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJztlksOgzAMRDkLq97/hKhb6s/4S1I8Egsae+ynEDfHQetkfn+Lhv/duvOfxKOtd8RS+2SNp8T1gcZrXhmx3Lq3T62PTP6M/efqrs6foeHnva3fi+QveUrx6JpXHp6M+eflz5jfVD2U58M8Us8WefcYPb/DT78j94PvsyI/2rvlf5GrE+WPnH+0RlTV/JZ3RMOfq935rfMA7WEn/or8Tn7rXJbeNa3Kr3mhnpos/NpeWL134tdyvPcNbp2qGbnTROefNWZXDX9OzK7qPv/Ws9nhYeVH4zpmc4WH5llVe/hj+VkemmdV7eGP5Wd5aJ5Vtf+Rv/puivQQlZe/q66UM/x9fQz/7/ubz//M/1id4bdr+OMemqe3tjbzMuYnwm/J5zwoIfxSTvb/J1IzGi/FDT/2bUnrUaHfuDf+npupjPPfqQr+p3t4svaq/BfuPFWd
+  </data>
+ </layer>
+ <layer name="Bad" width="64" height="48" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJzt1zEKACAIBVBPG3T/CzQ0V1RDYO+t4iIo/oixMqn9oF70mh0AAOzzR8NbdhCgcw8BgBX/AgAAAC+d5NJMWfYkl8qyZNIAzjIGeQ==
+  </data>
+ </layer>
+ <objectgroup name="Object Layer 1" width="64" height="48" visible="0">
+  <object x="-384" y="112"/>
+ </objectgroup>
+</map>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="64" height="48" tilewidth="50" tileheight="50">
+ <tileset firstgid="1" source="placeholder_streettiles-2.tsx"/>
+ <tileset firstgid="41" name="placeholder_home" tilewidth="50" tileheight="50">
+  <image source="placeholder_home.png" width="300" height="500"/>
+ </tileset>
+ <tileset firstgid="101" name="placeholderspritesheet_npc" tilewidth="50" tileheight="50">
+  <image source="placeholderspritesheet_npc.png" width="150" height="100"/>
+ </tileset>
+ <layer name="Walk Areas" width="64" height="48">
+  <data encoding="base64" compression="zlib">
+   eJztmtsOwiAMhtE7T5t6t0vf/yUdcUuI4VB6QDb/P+kVUPrpQks359K6zXbZsQ0Zdq/zbMcd24nAf3Cf5+AasaEw3qutcVP5/bxXxMLxkmrmPhebCHPdMq9mDTUW8INfm//u9M/trfBrnNmx/bbA7/93q3M75H8kTMo/RayGP6fv35USTygfS4o7xk9VuF/MZ0/8JeNoK/xWavX8c+LpYT+NeLTuWKW7DEct+Fcf2jlRQy35uXco6l1GElsLfq4PyzMB/OCv5Y/VyZY5nbM+rJclvsG/ff5cTTG6/J29NE4xqY91PZf/1z3YVr3cFD+ltpDWJpL+MNXHyOTPqYfcZJHf/p2f0/+x3MfaB9cn+MEPfvCDn9ZjtuiP9sJfer9g1R8Hfx/8lvtY++D6BD/4wQ9+8MdV6nFK8yc1h1r1XMGvx8+pn6k1tDV/y960dgySuHp4N68RA7dnrvHNWm1v2iqGVFxvGB43OA==
+  </data>
+ </layer>
+ <layer name="No Walk/ Home" width="64" height="48">
+  <data encoding="base64" compression="zlib">
+   eJztluEOgzAIhH0W3/8h98ss2Vrg4KBqucQsKtzxZVp7HGOdk+u7qPn3Fsp/KkdW7WhOtH7Gg0iqHzExamf3Ef9onSeT9f/Pcu/Oz1Dzz73R50XyR+dheCF5CM/K9Y+xfo/ysr7TTH60z3Kt+b+/nj2CZy5m/dWDHJZe5mxaHjsjqmx+5NyTEVXz83JW8KPrgXWGJ/Fn9Ffxe/Y5kTnvyG/1s3hqQvjRvcCb+LUe735jdF/K9e5pousfWvNUNT+n5qmqfv/Rd7PCA+W31lWszRkemmdWdvPH+lkemmdWdvPH+lkemmdW9hv5s/emlhmi8vJX5Uo9zV83R/P/n+/8/vf6H8tpflzNH/fQPL3Z2prHWD8t/Ej/zGMkC7/Uw/5+WjKj9VJd89ueLel+VNZn3Fv/28sU4/2vVAb/6hlWZt+V/wMZdEkv
+  </data>
+ </layer>
+ <layer name="Bad" width="64" height="48" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJzt1zEKACAIBVBPG3T/CzQ0V1RDYO+t4iIo/oixMqn9oF70mh0AAOzzR8NbdhCgcw8BgBX/AgAAAC+d5NJMWfYkl8qyZNIAzjIGeQ==
+  </data>
+ </layer>
+ <objectgroup name="Object Layer 1" width="64" height="48">
+  <object x="-384" y="112"/>
+ </objectgroup>
+</map>
