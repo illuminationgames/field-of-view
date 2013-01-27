@@ -265,11 +265,11 @@ function generateWorld() {
 	Crafty.c("playerAnim", {
 		init: function() {
 		  this.requires('SpriteAnimation, Collision, Grid')
-			  .animate('stand', 0, 0, 0)
-				.animate('defend', 1 /* For now */, 0, 0)
-			  .animate('walk', 1, 0, 4)
-			  .animate('huddled', 5, 0, 5)
-			  .animate('huddled_walk', 6, 0, 9);
+				.animate('stand', 0, 0, 0)
+				.animate('defend', 10, 0, 10)
+				.animate('walk', 1, 0, 4)
+				.animate('huddled', 5, 0, 5)
+				.animate('huddled_walk', 6, 0, 9);
 		}
 	});
 	
@@ -367,8 +367,8 @@ function generateWorld() {
 					scareTime = Date.now();
 
 					checkEnemy.canScare = false;
-
-					console.log("jump scare!", checkEnemy);
+					checkEnemy.stop().animate("stand_wolf", 50, -1);
+					// console.log("jump scare!", checkEnemy);
 					hbCanvas.scare();
 
 					playerLoseHealth(ENEMY_JUMP_SCARE_LOSS);
@@ -488,7 +488,7 @@ function generateWorld() {
 
 
 /**
-Function to load the map file
+Function to load the map file and generate obstacles, safe spaces, and enemies.
 */
 function generateMap(json){
 	// test whether the map has been loaded
@@ -502,6 +502,16 @@ function generateMap(json){
 	
 	MAP_WIDTH = mapWidth * TILE_WIDTH;
 	MAP_HEIGHT = mapHeight * TILE_HEIGHT;
+	
+	// create an enemy animation object
+	Crafty.c("enemyAnim", {
+		init: function() {
+		  this.requires('SpriteAnimation, Collision, Grid')
+				.animate('stand_normal', 0, 0, 1)
+				.animate('stand_wolf', 2, 0, 3);
+		}
+	});
+	
 	
 	var ctr = 0;
 	// initialize the safe, can't-walk-here, and enemy blocks
@@ -540,9 +550,10 @@ function generateMap(json){
 			tileNum = enemyData[ctr];
 			var isEnemy = Math.random();
 			if(tileNum == 102 || (tileNum == 107 && isEnemy < IS_ENEMY_PERCENT)){
-				var enemy = Crafty.e("2D, DOM, enemy")
+				var enemy = Crafty.e("2D, DOM, enemy, enemyAnim")
 						.attr({x: minX, y: minY, z: 1});
 
+				enemy.animate("stand_normal", 70, -1);
 				enemy.canScare = true;
 				enemy.isScaring = false;
 				
@@ -564,8 +575,9 @@ function generateMap(json){
 				enemy.effectRadius = new Crafty.circle(centerX, centerY, ENEMY_EFFECT_RADIUS + FOOTPRINT_WIDTH / 2);
 			}
 			else if(tileNum == 107){
-				var person = Crafty.e("2D, DOM, person")
+				var person = Crafty.e("2D, DOM, person, enemyAnim")
 					.attr({x: minX, y:minY, z: 1});
+				person.animate("stand_normal", 500, -1);	
 			}
 			
 			ctr += 1;
