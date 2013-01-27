@@ -30,6 +30,7 @@ function HeartbeatCanvas() {
 	this.visSpeed = false;
 	this._setVisibility(this.beatMax);
 	this.lastClone = -1;
+	this._homeDirection = 0;
 	lowLag.init({'urlPrefix':'audio/','debug':'none'});
 	lowLag.load(["Heartbeat1.wav"], 'Heartbeat1');
 	lowLag.load(["Heartbeat2.wav"], 'Heartbeat2');
@@ -244,10 +245,18 @@ $.extend(HeartbeatCanvas.prototype, {
 		ctx.save();
 		for (var b = 0; b < this.beats.length; b++) {
 			var beat = this.beats[b];
+			ctx.lineWidth = 1;
 			ctx.strokeStyle = 'rgba(255,255,255,'+beat.opacity+')';
 			ctx.beginPath();
 			ctx.arc(800, 600, beat.radius, 0, Math.PI * 2);
 			ctx.closePath();
+			ctx.stroke();
+
+			ctx.lineWidth = 2;
+			ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+			var arcWidth = Math.PI / 3 * beat.opacity;
+			ctx.beginPath();
+			ctx.arc(800, 600, beat.radius, this._homeDirection - arcWidth, this._homeDirection + arcWidth);
 			ctx.stroke();
 		}
 		ctx.restore();
