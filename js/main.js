@@ -39,6 +39,7 @@ var TILEMAP_SRC = "art/placeholder_streettiles.png";
 var ENEMYRANGE_SRC = "art/enemy_radius.png";
 var ENEMYMINORRANGE_SRC = "art/enemy_minorradius.png";
 var MAP_SRC = "map/field-view-map1.json";
+var SHOW_ENEMY_RADII = false;
 
 // damage variables
 var PLAYER_MAX_HEALTH = 250;
@@ -110,13 +111,15 @@ Crafty.sprite(SHADOW_WIDTH, SHADOW_HEIGHT, SHADOW_SRC, {
 	shadow: [0, 0]
 });
 
-Crafty.sprite(200, 200, ENEMYRANGE_SRC, {
-	enemy_range: [0, 0]
-});
+if (SHOW_ENEMY_RADII) {
+	Crafty.sprite(200, 200, ENEMYRANGE_SRC, {
+		enemy_range: [0, 0]
+	});
 
-Crafty.sprite(400, 400, ENEMYMINORRANGE_SRC, {
-	enemy_minorrange: [0, 0]
-});
+	Crafty.sprite(400, 400, ENEMYMINORRANGE_SRC, {
+		enemy_minorrange: [0, 0]
+	});
+}
 
 Crafty.sprite(TILE_WIDTH, TILE_HEIGHT, TILEMAP_SRC, {
 	street1: [0, 0],
@@ -548,10 +551,11 @@ function generateMap(json){
 				var centerY = minY + TILE_HEIGHT * 3 / 2;
 				var offsetX = centerX - ENEMY_EFFECT_RADIUS;
 				var offsetY = centerY - ENEMY_EFFECT_RADIUS;
-				var effectrange = Crafty.e("2D, DOM, enemy_minorrange")
-						.attr({x: centerX - ENEMY_EFFECT_RADIUS, y: centerY - ENEMY_EFFECT_RADIUS, z: 2});
-				var threatrange = Crafty.e("2D, DOM, enemy_range")
-						.attr({x: centerX - ENEMY_SCARE_RADIUS, y: centerY - ENEMY_SCARE_RADIUS, z: 2});
+				var displayClass = SHOW_ENEMY_RADII ? "DOM, " : ""
+				var effectrange = Crafty.e("2D, "+displayClass+" enemy_minorrange")
+						.attr({w: ENEMY_EFFECT_RADIUS * 2, h: ENEMY_EFFECT_RADIUS * 2, x: centerX - ENEMY_EFFECT_RADIUS, y: centerY - ENEMY_EFFECT_RADIUS, z: 2});
+				var threatrange = Crafty.e("2D, "+displayClass+" enemy_range")
+						.attr({w: ENEMY_SCARE_RADIUS * 2, h: ENEMY_SCARE_RADIUS * 2, x: centerX - ENEMY_SCARE_RADIUS, y: centerY - ENEMY_SCARE_RADIUS, z: 2});
 				threatrange.enemy = enemy;
 				effectrange.enemy = enemy;
 
