@@ -64,8 +64,9 @@ $.extend(HeartbeatCanvas.prototype, {
 	],
 	// Voice: [defenses, attacks]
 	_voiceFiles: {
-		1: [9, 9],
-		2: [0, 9]
+		1: [9, 0],
+		2: [0, 9],
+		3: [0, 9]
 	},
 	_loadSounds: function() {
 		var self = this;
