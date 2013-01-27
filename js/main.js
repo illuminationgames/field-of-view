@@ -39,7 +39,7 @@ var ENEMY_EFFECT_RADIUS = 100;
 var ENEMY_DISTANCE_MULTIPLIER = .2;
 
 var PLAYER_LOSE_HEALTH_RATE = 10;
-var PLAYER_LOSE_HEALTH_RATE_ALLEY = 5;
+var PLAYER_LOSE_HEALTH_RATE_ALLEY = 3;
 var PLAYER_LOSE_HEALTH_DELAY = 500;
 var PLAYER_GAIN_HEALTH_RATE = 10;
 var PLAYER_GAIN_HEALTH_DELAY = 500;
@@ -256,26 +256,21 @@ function generateWorld() {
 					if(!inEnemyRange){
 						inEnemyRange = true;
 						healthDownBySec();
-						if (!this.isPlaying("huddled_walk"))
-							this.stop().animate("huddled_walk", 20, -1);
 					}
+					if (!this.isPlaying("huddled_walk"))
+						this.stop().animate("huddled_walk", 20, -1);
 				}
-				else{
-					inEnemyRange = false;
-					if (!this.isPlaying("walk"))
-						this.stop().animate("walk", 20, -1);
-				}
-				
-				if(player.hit('alley')){
+				else if(player.hit('alley')){
 					if(!inAlley){
 						inAlley = true;
 						healthDownBySec();
-						if (!this.isPlaying("huddled_walk"))
-							this.stop().animate("huddled_walk", 20, -1);
 					}
+					if (!this.isPlaying("huddled_walk"))
+						this.stop().animate("huddled_walk", 20, -1);
 				}
 				else{
 					inAlley = false;
+					inEnemyRange = false;
 					if (!this.isPlaying("walk"))
 						this.stop().animate("walk", 20, -1);
 				}
