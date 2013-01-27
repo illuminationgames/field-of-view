@@ -15,7 +15,7 @@ function HeartbeatCanvas() {
 	}).appendTo('#cr-stage');
 	this.canvasElem = $('<canvas id="hb-canvas" width="1600" height="1600">').appendTo(this.backdrop);
 	this.lastDeltas = [];
-	this.moveTo(400,300);
+	this.moveTo(25,284);
 	this.ctx = this.canvasElem[0].getContext('2d');
 	this.beats = [];
 	this.pulse = false;

@@ -161,6 +161,7 @@ window.onload = function () {
 	var gamePos = $('#cr-stage').position();
 	//$('#cr-instructions').css({'display': 'block'});
 	$('#cr-instructions').css({top: gamePos.top, left: gamePos.left});
+	window.hbCanvas = new HeartbeatCanvas();
 
 	$('#cr-instructions').on('click', function() {
 		if(!seenInstructions){
@@ -170,7 +171,7 @@ window.onload = function () {
 			Crafty.init(MAP_WIDTH, MAP_HEIGHT);	// currently using DOM
 			
 			// Load heartbeat overlay
-			window.hbCanvas = new HeartbeatCanvas();
+			hbCanvas.setVisibility(250);	// 50 is game over limit
 			
 			//automatically play the loading scene
 			Crafty.scene("loading");
