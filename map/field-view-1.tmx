@@ -14,7 +14,7 @@
  </tileset>
  <layer name="Walk Areas" width="64" height="48">
   <data encoding="base64" compression="zlib">
-   eJztmtsOgyAMhtnudtJtd176/i85zSQhhkMpLQP3/0mvgNJvM7RUjQnrsdjtwDZE2FddFzsf2C4E/pP5Pgd3jw2J8VbNxk3lt/Pmne3Hc3zF9N5sIsw127ycNdRYwA9+af6nkT+3e+GXOLN9+/XAv/7vWue2y/8KWIwrJHfe5LEc/pD2v+lMjMfVGkuI28dPlbufz2dL/CnjqBd+LdV4/rnxtLCfRDxSd6zUXYajGvzWh3ROlFBNfu4dinqXKYmtBj/Xh+aZAH7w5/L78rlmTuesd+vlEt/g758/VlOMJn5nT41TrNSHXc/l/3UPtlYvN8RPqS1Ka5OS/jDVx8jkj6mF3KSR3/6dn9v/0tpH2wfXJ/jBD37wg5/WY9boj7bCn3q/oNUfB38b/Jr7aPvg+gQ/+MEPfvCHFetxluZPag7V6rmCX46fUz9Ta2ht/pq9aekYSuJq4d28RAzcnrnEN2u5vWmtGEJxfQD/hzZy
+   eJztmt0OgyAMhdnu9qfb7rz0/V9ymkliDIVSWobunKRXQOm3GUqrztF6THY7sHUR9lnXyc4HtguD/+S+z8E9YF1ivFXzcXP5/bxxY9vxHF8xvRcbGHPdMi9nDTcW8INfm//p9M/tvfBrnNmh/fbAP//vVuf2mv9FWIyL0nreELAcfkrb33RkxrPWHAvFHeLnar1fyGdL/CmTaC/8Vqrx/EvjaWE/jXi0aqxULSNRDX7vQzsnaqgmv7SG4tYyJbHV4Jf6sDwTwA/+XP5QPrfM6ZL13FoB/Mfnj90pehev2VPjHCv14ddL+X/dg63Vy6X4OXeL0rtJSX+Y66MX8sfUQm6yyG//zi/tf1ntY+1D6hP84Ac/+MHP6zFb9Edb4U+9X7Dqj4O/DX7Lfax9SH2CH/zgBz/4acV6nKX5k5tDrXqu4Nfjl9yfuXdoa/6avWntGEriauHdvEYM0p65xjdrub1pqxiouD79/zZy
   </data>
  </layer>
  <layer name="No Walk/ Home" width="64" height="48">
@@ -24,7 +24,7 @@
  </layer>
  <layer name="Bad" width="64" height="48">
   <data encoding="base64" compression="zlib">
-   eJzt11EKgCAQBUBPG0Td/7sTKKG1LjrzKyIIuu+VUnc01nZwDuyNuLsr4IxeI3f31h1wBgB1medQBHMI/qGDwFze4JpWyC2yJ9H8h0Txv8Ec3h5fkBcAgF3IzwA59fTSlbpsTy/VZfOQL8Y9hJwMxg==
+   eJzt11sKgCAQBVBXG0Tt/7sVGDHWOOQ5vyKCMI/bWt92c7aCfeBuxt8dCW9EjfzdU2fCGwD0VZ5DGcwh+IYMAnOpQaqye5JNPySL/gZzqD3eYF8AAFZhfwaoKZJL/5RlI7lUlq3DfjHuAtopDFo=
   </data>
  </layer>
  <objectgroup name="Object Layer 1" width="64" height="48" visible="0">
