@@ -90,57 +90,59 @@ Build our sprites below
 */
 
 
-Crafty.sprite(1, BG_MAP_SRC, {
-	map: [0, 0, MAP_WIDTH, MAP_HEIGHT]
-});
-
-Crafty.sprite(1, BG_FLOAT_SRC, {
-	map_float: [0, 0, MAP_WIDTH, MAP_HEIGHT]
-});
-
-Crafty.sprite(PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SRC, {
-	player: [0, 0]
-});
-
-Crafty.sprite(ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_SRC, {
-	enemy: [0, 0]
-});
-
-Crafty.sprite(ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_SRC, {
-	person: [0, 0]
-});
-
-Crafty.sprite(SHADOW_WIDTH, SHADOW_HEIGHT, SHADOW_SRC, {
-	shadow: [0, 0]
-});
-
-if (SHOW_ENEMY_RADII) {
-	Crafty.sprite(200, 200, ENEMYRANGE_SRC, {
-		enemy_range: [0, 0]
+function buildSprites() {
+	Crafty.sprite(1, BG_MAP_SRC, {
+		map: [0, 0, MAP_WIDTH, MAP_HEIGHT]
 	});
 
-	Crafty.sprite(400, 400, ENEMYMINORRANGE_SRC, {
-		enemy_minorrange: [0, 0]
+	Crafty.sprite(1, BG_FLOAT_SRC, {
+		map_float: [0, 0, MAP_WIDTH, MAP_HEIGHT]
+	});
+
+	Crafty.sprite(PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SRC, {
+		player: [0, 0]
+	});
+
+	Crafty.sprite(ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_SRC, {
+		enemy: [0, 0]
+	});
+
+	Crafty.sprite(ENEMY_WIDTH, ENEMY_HEIGHT, ENEMY_SRC, {
+		person: [0, 0]
+	});
+
+	Crafty.sprite(SHADOW_WIDTH, SHADOW_HEIGHT, SHADOW_SRC, {
+		shadow: [0, 0]
+	});
+
+	if (SHOW_ENEMY_RADII) {
+		Crafty.sprite(200, 200, ENEMYRANGE_SRC, {
+			enemy_range: [0, 0]
+		});
+
+		Crafty.sprite(400, 400, ENEMYMINORRANGE_SRC, {
+			enemy_minorrange: [0, 0]
+		});
+	}
+
+	Crafty.sprite(TILE_WIDTH, TILE_HEIGHT, TILEMAP_SRC, {
+		street1: [0, 0],
+		street2: [1, 0],
+		sidewalk1: [0, 1],
+		sidewalk2: [1, 1],
+		sidewalk3: [2, 1],
+		sidewalk4: [3, 1],
+		sidewalk5: [4, 1],
+		sidewalk6: [5, 1],
+		sidewalk7: [6, 1],
+		sidewalk8: [7, 1],
+		alley1: [0, 2],
+		alley2: [1, 2],
+		clutter: [0, 3],
+		safe: [0, 4],
+		no_walk: [1, 4]
 	});
 }
-
-Crafty.sprite(TILE_WIDTH, TILE_HEIGHT, TILEMAP_SRC, {
-	street1: [0, 0],
-	street2: [1, 0],
-	sidewalk1: [0, 1],
-	sidewalk2: [1, 1],
-	sidewalk3: [2, 1],
-	sidewalk4: [3, 1],
-	sidewalk5: [4, 1],
-	sidewalk6: [5, 1],
-	sidewalk7: [6, 1],
-	sidewalk8: [7, 1],
-	alley1: [0, 2],
-	alley2: [1, 2],
-	clutter: [0, 3],
-	safe: [0, 4],
-	no_walk: [1, 4]
-});
 
 var TILE_LIST = new Array(new Array("street1", "street2"), 
 						new Array("sidewalk1", "sidewalk2", "sidewalk3", "sidewalk4", "sidewalk5", "sidewalk6", "sidewalk7", "sidewalk8"),
@@ -168,10 +170,7 @@ window.onload = function () {
 			$('#cr-instructions').css({display: 'none'});
 			seenInstructions = true;
 			//start crafty
-			Crafty.init(MAP_WIDTH, MAP_HEIGHT);	// currently using DOM
-			
-			// Load heartbeat overlay
-			hbCanvas.setVisibility(250);	// 50 is game over limit
+			Crafty.init(SCREEN_WIDTH, SCREEN_HEIGHT);	// currently using DOM
 			
 			//automatically play the loading scene
 			Crafty.scene("loading");
@@ -187,13 +186,23 @@ Crafty.scene("loading", function () {
 	console.log("in loading");
     //load takes an array of assets and a callback when complete, runs the main scene
     Crafty.load([BG_MAP_SRC, BG_FLOAT_SRC, PLAYER_SRC, ENEMY_SRC, TILEMAP_SRC, SHADOW_SRC, ENEMYRANGE_SRC], function () {
+				// Load heartbeat overlay
+				hbCanvas.setVisibility(250);	// 50 is game over limit
+
+				buildSprites();
+			
         Crafty.scene("main"); 
-    });
+    }, function(e) {
+			loadingText.text("Loading: "+Math.round(e.percent)+"%");
+			console.log("load progress:",e);
+		}, function(e) {
+			console.log("load error:",e);
+		});
 
     //black background with some loading text
     Crafty.background("#000");
-    Crafty.e("2D, DOM, Text").attr({ w: 100, h: 20, x: SCREEN_WIDTH / 2 - 50, y: SCREEN_HEIGHT / 2 - 10 })
-            .text("Loading")
+    var loadingText = Crafty.e("2D, DOM, Text").attr({ w: 100, h: 20, x: SCREEN_WIDTH / 2 - 50, y: SCREEN_HEIGHT / 2 - 10 })
+            .text("Loading: 0%")
             .css({ "text-align": "center" });
 });
 

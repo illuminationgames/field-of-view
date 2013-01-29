@@ -78,7 +78,7 @@ $.extend(HeartbeatCanvas.prototype, {
 		lowLag.load(["Heartbeat3.ogg","Heartbeat3.mp3"], 'Heartbeat3');
 
 		// Buzz is used for all the other sounds, because it allows play/stop/etc and we don't need multiple instances.
-		var maxVolume = 20;
+		var maxVolume = 100;
 		buzz.defaults.volume = maxVolume;
 		this._sounds = {};
 		$.each(this._soundFiles, function(_,name) {
@@ -230,15 +230,19 @@ $.extend(HeartbeatCanvas.prototype, {
 			this.backdrop.css('background','');
 		} else if (maxVis > 20) {
 			var maxRad = maxVis + 50;
-			var gradDef = 'circle '+maxRad+'px, rgba(0,0,0,0) 0px';
+			var sizeDef = 'circle '+maxRad+'px';
+			var wkSizeDef = 'center center, '+maxRad+'px '+maxRad+'px';
+			var gradDef = ', rgba(0,0,0,0) 0px';
 			if (maxVis > 100)
 				gradDef += ', rgba(0,0,0,0.2) 50px';
 			gradDef += ', rgba(0,0,0,0.5) '+(maxVis-50)+'px';
 			gradDef += ', rgba(0,0,0,0.9) '+maxVis+'px';
 			gradDef += ', rgba(0,0,0,1) '+maxRad+'px';
-			this.backdrop.css({
-				backgroundImage: 'radial-gradient('+gradDef+')'
-			});
+			window.gradDef = gradDef;
+			this.backdrop.css('background-image', '-moz-radial-gradient('+sizeDef+gradDef+')');
+			this.backdrop.css('background-image', '-webkit-radial-gradient('+wkSizeDef+gradDef+')');
+			this.backdrop.css('background-image', '-o-radial-gradient('+sizeDef+gradDef+')');
+			this.backdrop.css('background-image', 'radial-gradient('+sizeDef+gradDef+')');
 			this.setPulse(this._pulseFromVisibility(maxVis));
 		} else {
 			this.backdrop.css({
