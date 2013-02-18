@@ -446,6 +446,7 @@ function generateWorld() {
 
 	player.syncCanvas = function(hbCanvas) {
 		hbCanvas.moveTo(this._x + this._w / 2 + Crafty.viewport.x, this._y + this._h / 3 + Crafty.viewport.y)
+		hbCanvas.setLamp(534 + Crafty.viewport.x, 250 + Crafty.viewport.y)
 		hbCanvas.setHomeDirection(HOME_X * 50 - this._x, HOME_Y * 50 - this._y);
 	}
 
