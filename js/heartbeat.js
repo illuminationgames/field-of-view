@@ -71,8 +71,9 @@ $.extend(HeartbeatCanvas.prototype, {
 	// Voice: [defenses, attacks]
 	_voiceFiles: {
 		1: [9, 0],
-		2: [0, 9],
-		3: [0, 9]
+		2: [9, 9],
+		3: [0, 9],
+		4: [10, 9]
 	},
 	_hookCraftyTimer: function() {
 		var oldStep = Crafty.timer.step;
