@@ -1,5 +1,7 @@
 function HeartbeatCanvas() {
 	//console.log('hb-init');
+	this.width = 800;
+	this.height = 600;
 	this.backdrop = $('<div>').css({
 		position:'absolute',
 		zIndex:2,
@@ -9,7 +11,6 @@ function HeartbeatCanvas() {
 	this.canvasElem = $('<canvas id="hb-canvas" width="800" height="600">').appendTo(this.backdrop);
 	this.lastDeltas = [];
 	this._beatx = this._beaty = null;
-	this._lampx = this._lampy = -100;
 	this.lampRadius = 100;
 	this.lampOpacity = 1;
 	this.moveTo(25,284);
@@ -32,6 +33,14 @@ function HeartbeatCanvas() {
 	this._lastScare = null;
 	this._playerVoice = null;
 	this._lastDefense = null;
+	this._lamps = [];
+	this._viewport = {x:10000, y:10000};
+	// This should eventually get done dynamically
+	this.addLamp(534, 250);
+	this.addLamp(1636, 550);
+	this.addLamp(1146, 925, 150);
+	this.addLamp(915, 2150);
+	this.addLamp(2600, 2075, 150);
 
 	this._safe = false;
 	this._loadSounds();
@@ -154,9 +163,12 @@ $.extend(HeartbeatCanvas.prototype, {
 		this._beatx = x;
 		this._beaty = y;
 	},
-	setLamp: function(x, y) {
-		this._lampx = x;
-		this._lampy = y;
+	addLamp: function(x, y, radius) {
+		this._lamps.push({x:x, y:y, radius: radius || this.lampRadius});
+	},
+	setViewport: function(x, y) {
+		this._viewport.x = x;
+		this._viewport.y = y;
 	},
 	disable: function() {
 		this.setPulse(false);
@@ -367,6 +379,12 @@ $.extend(HeartbeatCanvas.prototype, {
 		ctx.save();
 		var maxVis = this.visibility;
 		var maxRad = maxVis + 50;
+		/*
+		var maxBeat = maxVis - 50;
+		if (this.beats.length) {
+			maxBeat = this.beats[0].radius;
+		}
+		*/
 		//var sizeDef = 'circle '+maxRad+'px';
 		//var wkSizeDef = 'center center, '+maxRad+'px '+maxRad+'px';
 		var rgrad = ctx.createRadialGradient(this._beatx,this._beaty,0,this._beatx,this._beaty,maxRad);
@@ -377,6 +395,10 @@ $.extend(HeartbeatCanvas.prototype, {
 			addStop(0, 0);
 			if (maxVis > 100)
 				addStop(50, 0.2);
+			/*
+			addStop(maxBeat, 0.5);
+			addStop((maxBeat + maxRad) / 2, 0.9);
+			*/
 			addStop(maxVis-50, 0.5);
 			addStop(maxVis, 0.9);
 			addStop(maxRad, 1);
@@ -386,16 +408,21 @@ $.extend(HeartbeatCanvas.prototype, {
 		}
 		ctx.fillRect(0,0,800,600);
 		ctx.restore();
+		var vp = this._viewport;
 
-		ctx.save();
-		ctx.translate(this._lampx-this.lampRadius,this._lampy-this.lampRadius);
-		ctx.globalCompositeOperation = 'destination-out';
-		rgrad = ctx.createRadialGradient(this.lampRadius, this.lampRadius, 0, this.lampRadius, this.lampRadius, this.lampRadius);
-		rgrad.addColorStop(0, 'rgba(0,0,0,'+this.lampOpacity+')');
-		rgrad.addColorStop(1, 'rgba(0,0,0,0)');
-		ctx.fillStyle = rgrad;
-		ctx.fillRect(0,0,this.lampRadius * 2,this.lampRadius * 2);
-		ctx.restore();
+		for (var l = 0; l < this._lamps.length; l++) {
+			var lamp = this._lamps[l];
+			if (lamp.x+vp.x-lamp.radius > this.width || lamp.x+vp.x+lamp.radius < 0 || lamp.y+vp.y-lamp.radius > this.height || lamp.y+vp.y+lamp.radius < 0) continue;
+			ctx.save();
+			ctx.translate(lamp.x+vp.x-lamp.radius,lamp.y+vp.y-lamp.radius);
+			ctx.globalCompositeOperation = 'destination-out';
+			rgrad = ctx.createRadialGradient(lamp.radius, lamp.radius, 0, lamp.radius, lamp.radius, lamp.radius);
+			rgrad.addColorStop(0, 'rgba(0,0,0,'+this.lampOpacity+')');
+			rgrad.addColorStop(1, 'rgba(0,0,0,0)');
+			ctx.fillStyle = rgrad;
+			ctx.fillRect(0,0,lamp.radius * 2,lamp.radius * 2);
+			ctx.restore();
+		}
 
 
 		if (!this.beats.length) return;
