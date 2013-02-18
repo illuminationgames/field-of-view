@@ -40,7 +40,7 @@ var lowLag = new function(){
 
 		}
 
-		var format = "sm2";
+		var format = "audioTag";
 		if(force != undefined) format = force;
 		else {
 			if(typeof(webkitAudioContext) != "undefined") format = 'webkitAudio';
