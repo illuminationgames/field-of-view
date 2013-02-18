@@ -1,10 +1,3 @@
-if (!window.requestAnimationFrame) {
-	(function() {
-		var reqAnimFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-		window.requestAnimationFrame = reqAnimFrame;
-	})();
-}
-
 function HeartbeatCanvas() {
 	//console.log('hb-init');
 	this.backdrop = $('<div>').css({
@@ -27,7 +20,7 @@ function HeartbeatCanvas() {
 	this._pulseInterval = false;
 	this._pulseIntervalUpdate = false;
 	this.lastFrame = false;
-	this._aFrameProxy = $.proxy(this, '_animFrame');
+	this._hookCraftyTimer();
 	this.beatSpeed = 200;
 	this.targetVisibility = false;
 	this.visSpeed = false;
@@ -71,6 +64,15 @@ $.extend(HeartbeatCanvas.prototype, {
 		1: [9, 0],
 		2: [0, 9],
 		3: [0, 9]
+	},
+	_hookCraftyTimer: function() {
+		var oldStep = Crafty.timer.step;
+		var self = this;
+		function newStep() {
+			oldStep.apply(Crafty.timer, arguments);
+			self._animFrame(Date.now());
+		}
+		Crafty.timer.step = newStep;
 	},
 	_loadSounds: function() {
 		var self = this;
@@ -326,6 +328,7 @@ $.extend(HeartbeatCanvas.prototype, {
 		}
 	},
 	_animFrame: function(timestamp) {
+		if (this.lastFrame === false) return;
 		var delta = (timestamp - this.lastFrame) / 1000.0;
 		this.lastFrame = timestamp;
 		for (var b = 0; b < this.beats.length; b++) {
@@ -352,9 +355,7 @@ $.extend(HeartbeatCanvas.prototype, {
 
 		this._draw();
 
-		if (this.beats.length) {
-			window.requestAnimationFrame(this._aFrameProxy, this.canvasElem[0]);
-		} else {
+		if (!this.beats.length) {
 			this.lastFrame = false;
 		}
 	},
