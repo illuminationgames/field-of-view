@@ -1,20 +1,18 @@
-if (!window.requestAnimationFrame) {
-	(function() {
-		var reqAnimFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-		window.requestAnimationFrame = reqAnimFrame;
-	})();
-}
-
 function HeartbeatCanvas() {
 	//console.log('hb-init');
+	this.width = 800;
+	this.height = 600;
 	this.backdrop = $('<div>').css({
 		position:'absolute',
 		zIndex:2,
-		width:1600,
-		height:1600 /* Extend a little further down than 1200 */
+		width:800,
+		height:600
 	}).appendTo('#cr-stage');
-	this.canvasElem = $('<canvas id="hb-canvas" width="1600" height="1600">').appendTo(this.backdrop);
+	this.canvasElem = $('<canvas id="hb-canvas" width="800" height="600">').appendTo(this.backdrop);
 	this.lastDeltas = [];
+	this._beatx = this._beaty = null;
+	this.lampRadius = 100;
+	this.lampOpacity = 1;
 	this.moveTo(25,284);
 	this.ctx = this.canvasElem[0].getContext('2d');
 	this.beats = [];
@@ -23,7 +21,7 @@ function HeartbeatCanvas() {
 	this._pulseInterval = false;
 	this._pulseIntervalUpdate = false;
 	this.lastFrame = false;
-	this._aFrameProxy = $.proxy(this, '_animFrame');
+	this._hookCraftyTimer();
 	this.beatSpeed = 200;
 	this.targetVisibility = false;
 	this.visSpeed = false;
@@ -35,6 +33,14 @@ function HeartbeatCanvas() {
 	this._lastScare = null;
 	this._playerVoice = null;
 	this._lastDefense = null;
+	this._lamps = [];
+	this._viewport = {x:10000, y:10000};
+	// This should eventually get done dynamically
+	this.addLamp(534, 250);
+	this.addLamp(1636, 550);
+	this.addLamp(1146, 925, 150);
+	this.addLamp(915, 2150);
+	this.addLamp(2600, 2075, 150);
 
 	this._safe = false;
 	this._loadSounds();
@@ -67,6 +73,15 @@ $.extend(HeartbeatCanvas.prototype, {
 		1: [9, 0],
 		2: [0, 9],
 		3: [0, 9]
+	},
+	_hookCraftyTimer: function() {
+		var oldStep = Crafty.timer.step;
+		var self = this;
+		function newStep() {
+			oldStep.apply(Crafty.timer, arguments);
+			self._animFrame(Date.now());
+		}
+		Crafty.timer.step = newStep;
 	},
 	_loadSounds: function() {
 		var self = this;
@@ -145,10 +160,15 @@ $.extend(HeartbeatCanvas.prototype, {
 	},
 	moveTo: function(x, y) {
 		//console.log('hb-moveto',x,y);
-		this.backdrop.css({
-			left: x - 800,
-			top: y - 800
-		});
+		this._beatx = x;
+		this._beaty = y;
+	},
+	addLamp: function(x, y, radius) {
+		this._lamps.push({x:x, y:y, radius: radius || this.lampRadius});
+	},
+	setViewport: function(x, y) {
+		this._viewport.x = x;
+		this._viewport.y = y;
 	},
 	disable: function() {
 		this.setPulse(false);
@@ -238,11 +258,12 @@ $.extend(HeartbeatCanvas.prototype, {
 			gradDef += ', rgba(0,0,0,0.5) '+(maxVis-50)+'px';
 			gradDef += ', rgba(0,0,0,0.9) '+maxVis+'px';
 			gradDef += ', rgba(0,0,0,1) '+maxRad+'px';
-			window.gradDef = gradDef;
+                        /*
 			this.backdrop.css('background-image', '-moz-radial-gradient('+sizeDef+gradDef+')');
 			this.backdrop.css('background-image', '-webkit-radial-gradient('+wkSizeDef+gradDef+')');
 			this.backdrop.css('background-image', '-o-radial-gradient('+sizeDef+gradDef+')');
 			this.backdrop.css('background-image', 'radial-gradient('+sizeDef+gradDef+')');
+                        */
 			this.setPulse(this._pulseFromVisibility(maxVis));
 		} else {
 			this.backdrop.css({
@@ -319,6 +340,7 @@ $.extend(HeartbeatCanvas.prototype, {
 		}
 	},
 	_animFrame: function(timestamp) {
+		if (this.lastFrame === false) return;
 		var delta = (timestamp - this.lastFrame) / 1000.0;
 		this.lastFrame = timestamp;
 		for (var b = 0; b < this.beats.length; b++) {
@@ -345,24 +367,74 @@ $.extend(HeartbeatCanvas.prototype, {
 
 		this._draw();
 
-		if (this.beats.length) {
-			window.requestAnimationFrame(this._aFrameProxy, this.canvasElem[0]);
-		} else {
+		if (!this.beats.length) {
 			this.lastFrame = false;
 		}
 	},
 	_draw: function() {
 		//console.log('hb-draw');
 		var ctx = this.ctx;
-		ctx.clearRect(0,0,1600,1200);
-		if (!this.beats.length) return;
+		ctx.clearRect(0,0,800,600);
+
 		ctx.save();
+		var maxVis = this.visibility;
+		var maxRad = maxVis + 50;
+		/*
+		var maxBeat = maxVis - 50;
+		if (this.beats.length) {
+			maxBeat = this.beats[0].radius;
+		}
+		*/
+		//var sizeDef = 'circle '+maxRad+'px';
+		//var wkSizeDef = 'center center, '+maxRad+'px '+maxRad+'px';
+		var rgrad = ctx.createRadialGradient(this._beatx,this._beaty,0,this._beatx,this._beaty,maxRad);
+		function addStop(pxrad, alpha) {
+			rgrad.addColorStop(pxrad / maxRad, 'rgba(0,0,0,'+alpha+')');
+		}
+		if (maxVis >= 50) {
+			addStop(0, 0);
+			if (maxVis > 100)
+				addStop(50, 0.2);
+			/*
+			addStop(maxBeat, 0.5);
+			addStop((maxBeat + maxRad) / 2, 0.9);
+			*/
+			addStop(maxVis-50, 0.5);
+			addStop(maxVis, 0.9);
+			addStop(maxRad, 1);
+			ctx.fillStyle = rgrad;
+		} else {
+			ctx.fillStyle = 'black';
+		}
+		ctx.fillRect(0,0,800,600);
+		ctx.restore();
+		var vp = this._viewport;
+
+		for (var l = 0; l < this._lamps.length; l++) {
+			var lamp = this._lamps[l];
+			if (lamp.x+vp.x-lamp.radius > this.width || lamp.x+vp.x+lamp.radius < 0 || lamp.y+vp.y-lamp.radius > this.height || lamp.y+vp.y+lamp.radius < 0) continue;
+			ctx.save();
+			ctx.translate(lamp.x+vp.x-lamp.radius,lamp.y+vp.y-lamp.radius);
+			ctx.globalCompositeOperation = 'destination-out';
+			rgrad = ctx.createRadialGradient(lamp.radius, lamp.radius, 0, lamp.radius, lamp.radius, lamp.radius);
+			rgrad.addColorStop(0, 'rgba(0,0,0,'+this.lampOpacity+')');
+			rgrad.addColorStop(1, 'rgba(0,0,0,0)');
+			ctx.fillStyle = rgrad;
+			ctx.fillRect(0,0,lamp.radius * 2,lamp.radius * 2);
+			ctx.restore();
+		}
+
+
+		if (!this.beats.length) return;
+
+		ctx.save();
+		ctx.translate(this._beatx, this._beaty);
 		for (var b = 0; b < this.beats.length; b++) {
 			var beat = this.beats[b];
 			ctx.lineWidth = 1;
 			ctx.strokeStyle = 'rgba(255,255,255,'+beat.opacity+')';
 			ctx.beginPath();
-			ctx.arc(800, 800, beat.radius, 0, Math.PI * 2);
+			ctx.arc(0, 0, beat.radius, 0, Math.PI * 2);
 			ctx.closePath();
 			ctx.stroke();
 
@@ -370,7 +442,7 @@ $.extend(HeartbeatCanvas.prototype, {
 			ctx.strokeStyle = 'rgba(255,255,255,1)';
 			var arcWidth = Math.PI / 4 * beat.opacity;
 			ctx.beginPath();
-			ctx.arc(800, 800, beat.radius, this._homeDirection - arcWidth, this._homeDirection + arcWidth);
+			ctx.arc(0, 0, beat.radius, this._homeDirection - arcWidth, this._homeDirection + arcWidth);
 			ctx.stroke();
 		}
 		ctx.restore();
